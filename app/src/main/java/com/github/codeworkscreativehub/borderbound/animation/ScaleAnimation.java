@@ -1,0 +1,49 @@
+package com.github.codeworkscreativehub.borderbound.animation;
+
+import com.github.codeworkscreativehub.borderbound.object.Drawable;
+
+public class ScaleAnimation extends AnimationSingle {
+    private float from;
+    private float to;
+    private boolean hideAfter = false;
+
+    public ScaleAnimation(Drawable mesh, int duration, int startIn) {
+        super(mesh, duration, startIn);
+    }
+
+    public ScaleAnimation setTo(float to) {
+        this.to = to;
+        return this;
+    }
+
+    public ScaleAnimation setHideAfter(boolean hideAfter) {
+        this.hideAfter = hideAfter;
+        return this;
+    }
+
+    @Override
+    void firstTick() {
+        this.from = getSubject().getScale();
+    }
+
+    @Override
+    void tick(double percentage) {
+        getSubject().setScale((float) (from + (to - from) * percentage));
+    }
+
+    @Override
+    void finalTick() {
+        getSubject().setScale(to);
+
+        if (hideAfter) {
+            getSubject().setVisible(false);
+        }
+    }
+
+    @Override
+    ScaleAnimation reverse() {
+        ScaleAnimation reversed = new ScaleAnimation(getSubject(), getDuration(), getDelay());
+        reversed.setTo(from);
+        return reversed;
+    }
+}
