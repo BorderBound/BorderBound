@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :sparkles: Enhancements:
 
+* Add initial puzzle solver implementation ([4fd5347](https://github.com/BorderBound/BorderBound/commit/4fd5347))
 * Clean up compressed level files after build ([3b3f5d7](https://github.com/BorderBound/BorderBound/commit/3b3f5d7))
 * Configure Dependabot for Gradle and GitHub Actions ([3cd7c75](https://github.com/BorderBound/BorderBound/commit/3cd7c75))
 * Add initial GitHub Actions workflows ([8dea5af](https://github.com/BorderBound/BorderBound/commit/8dea5af))
@@ -15,6 +16,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Remove unsolved levels and clean up level files ([e642cdb](https://github.com/BorderBound/BorderBound/commit/e642cdb))
 * Apply standard XML formatting ([46ee85c](https://github.com/BorderBound/BorderBound/commit/46ee85c))
 * Renumber levels and add sorting script ([d696fc8](https://github.com/BorderBound/BorderBound/commit/d696fc8))
 * Update project name and modernize code ([94e7dc4](https://github.com/BorderBound/BorderBound/commit/94e7dc4))
