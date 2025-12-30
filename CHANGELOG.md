@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :sparkles: Enhancements:
 
+* Add initial GitHub Actions workflows ([8dea5af](https://github.com/BorderBound/BorderBound/commit/8dea5af))
 * Add automatic changelog generation ([11120d7](https://github.com/BorderBound/BorderBound/commit/11120d7))
 * Add community health files ([ace0a74](https://github.com/BorderBound/BorderBound/commit/ace0a74))
 * Enable debug levels ([aae4792](https://github.com/BorderBound/BorderBound/commit/aae4792))
