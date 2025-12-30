@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Apply standard XML formatting ([46ee85c](https://github.com/BorderBound/BorderBound/commit/46ee85c))
 * Renumber levels and add sorting script ([d696fc8](https://github.com/BorderBound/BorderBound/commit/d696fc8))
 * Update project name and modernize code ([94e7dc4](https://github.com/BorderBound/BorderBound/commit/94e7dc4))
 * Simplify level unlock logic and improve readability ([c27c03a](https://github.com/BorderBound/BorderBound/commit/c27c03a))
