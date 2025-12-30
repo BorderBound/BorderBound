@@ -6,7 +6,7 @@ const https = require("https");
 
 const OUTPUT_FILE = "CHANGELOG.md";
 const TAGS_TO_INCLUDE = 10; // Number of recent tags to include
-const REPO_URL = "https://github.com/CodeWorksCreativeHub/mLauncher";
+const REPO_URL = "https://github.com/BorderBound/BorderBound";
 
 const HEADER = `# Changelog
 
@@ -146,7 +146,8 @@ async function generateChangelog() {
 	let changelog = HEADER;
 
 	// Coming Soon / Unreleased
-	const latestTag = tags[0] || "unreleased";
+	const firstCommit = run("git rev-list --max-parents=0 HEAD");
+    const latestTag = tags[0] || firstCommit;
 	const rawUnreleased = run(`git log ${latestTag}..HEAD --pretty=format:"%h|%s"`).split("\n");
 	const unreleasedCommits = rawUnreleased
 		.map((line) => {
