@@ -19,13 +19,12 @@ const FOOTER = `---
 const VERBOSE = process.argv.includes("--verbose");
 function log(...args) {
 	if (!VERBOSE) return;
-	const cleanArgs = args.map((arg) => (typeof arg === "string" ? arg.replace("### ", "").trim() : arg));
+	const cleanArgs = args.map(arg => (typeof arg === "string" ? arg.replace("### ", "").trim() : arg));
 	console.log(...cleanArgs);
 }
 
 // Commit parsing rules
 const commitParsers = [
-	// Skip some "noise" commits
 	{ message: /^chore\(release\): prepare for/i, skip: true },
 	{ message: /^chore\(deps.*\)/i, skip: true },
 	{ message: /^chore\(change.*\)/i, skip: true },
@@ -34,52 +33,24 @@ const commitParsers = [
 	{ message: /^fixes/i, skip: true },
 	{ message: /^build/i, skip: true },
 
-	// Enhancements (new features, improvements, UX, performance)
 	{ message: /^feat|^perf|^style|^ui|^ux/i, group: "### :sparkles: Enhancements:" },
-
-	// Bug fixes & hotfixes
 	{ message: /^fix|^bug|^hotfix|^emergency/i, group: "### :bug: Bug Fixes:" },
-
-	// Code quality (refactors, cleanup without changing behavior)
 	{ message: /^refactor/i, group: "### :wrench: Code Quality:" },
-
-	// Documentation
 	{ message: /^doc/i, group: "### :books: Documentation:" },
-
-	// Localization & internationalization
 	{ message: /^(lang|i18n)/i, group: "### :globe_with_meridians: Localization:" },
-
-	// Security
 	{ message: /^security/i, group: "### :lock: Security:" },
-
-	// Feature removal / drops
 	{ message: /^drop|^remove|^deprecated/i, group: "### :x: Feature Removals:" },
-
-	// Reverts
 	{ message: /^revert/i, group: "### :rewind: Reverts:" },
-
-	// Build-related
 	{ message: /^build/i, group: "### :building_construction: Build:" },
-
-	// Dependencies-related
 	{ message: /^dependency|^deps/i, group: "### :package: Dependencies:" },
-
-	// Meta: configuration, CI/CD, versioning, releases
 	{ message: /^config|^configuration|^ci|^pipeline|^release|^version|^versioning/i, group: "### :gear: Meta:" },
-
-	// Tests
 	{ message: /^test/i, group: "### :test_tube: Tests:" },
-
-	// Infrastructure & Ops
 	{ message: /^infra|^infrastructure|^ops/i, group: "### :office: Infrastructure & Ops:" },
-
-	// Chore & cleanup
 	{ message: /^chore|^housekeeping|^cleanup|^clean\(up\)/i, group: "### :broom: Maintenance & Cleanup:" },
 ];
 
-const GROUP_ORDER = commitParsers.filter((p) => !p.skip).map((p) => p.group);
+const GROUP_ORDER = commitParsers.filter(p => !p.skip).map(p => p.group);
 
-// Helper functions
 function run(cmd) {
 	log("Running:", cmd);
 	return execSync(cmd, { encoding: "utf8" }).trim();
@@ -111,18 +82,17 @@ function linkPR(message) {
 	return message.replace(/\(#(\d+)\)/g, (_, num) => `([#${num}](${REPO_URL}/pull/${num}))`);
 }
 
-// Get GitHub release title for a tag
 function getReleaseTitle(tag) {
 	const options = {
 		hostname: "api.github.com",
-		path: `/repos/CodeWorksCreativeHub/mLauncher/releases/tags/${tag}`,
+		path: `/repos/BorderBound/BorderBound/releases/tags/${tag}`,
 		method: "GET",
 		headers: { "User-Agent": "Node.js" },
 	};
-	return new Promise((resolve) => {
-		const req = https.request(options, (res) => {
+	return new Promise(resolve => {
+		const req = https.request(options, res => {
 			let data = "";
-			res.on("data", (chunk) => (data += chunk));
+			res.on("data", chunk => (data += chunk));
 			res.on("end", () => {
 				try {
 					const json = JSON.parse(data);
@@ -137,7 +107,6 @@ function getReleaseTitle(tag) {
 	});
 }
 
-// Main async function
 async function generateChangelog() {
 	const allTags = run("git tag --sort=-creatordate").split("\n");
 	const tags = allTags.slice(0, TAGS_TO_INCLUDE);
@@ -145,12 +114,14 @@ async function generateChangelog() {
 
 	let changelog = HEADER;
 
-	// Coming Soon / Unreleased
-	const firstCommit = run("git rev-list --max-parents=0 HEAD");
-    const latestTag = tags[0] || firstCommit;
+	const firstCommitFull = run("git rev-list --max-parents=0 HEAD");
+	const firstCommitShort = firstCommitFull.slice(0, 7); // short SHA
+	const latestTag = tags[0] || firstCommitShort;
+
+	// Unreleased commits
 	const rawUnreleased = run(`git log ${latestTag}..HEAD --pretty=format:"%h|%s"`).split("\n");
 	const unreleasedCommits = rawUnreleased
-		.map((line) => {
+		.map(line => {
 			const [hash, ...msgParts] = line.split("|");
 			const message = msgParts.join("|");
 			const classified = classifyCommit(message);
@@ -161,7 +132,7 @@ async function generateChangelog() {
 
 	if (unreleasedCommits.length > 0) {
 		log("Unreleased commits found:", unreleasedCommits.length);
-		changelog += `## [${latestTag} → Unreleased](https://github.com/CodeWorksCreativeHub/mLauncher/tree/main) - In Development\n\n`;
+		changelog += `## [${latestTag} → Unreleased](https://github.com/BorderBound/BorderBound/tree/main) - In Development\n\n`;
 		const groups = {};
 		for (const c of unreleasedCommits) {
 			groups[c.group] = groups[c.group] || [];
@@ -175,49 +146,50 @@ async function generateChangelog() {
 		}
 	}
 
-	// Generate changelog for each tag
-	for (let i = 0; i < tags.length; i++) {
-		const currentTag = tags[i];
-		const releaseTitle = await getReleaseTitle(currentTag); // GitHub release title
-		log(`Processing tag: ${currentTag} (${releaseTitle})`);
+	// Historical tags only if there is a real tag
+	if (tags[0]) {
+		for (let i = 0; i < tags.length; i++) {
+			const currentTag = tags[i];
+			const releaseTitle = await getReleaseTitle(currentTag);
+			log(`Processing tag: ${currentTag} (${releaseTitle})`);
 
-		let range;
-		if (i === tags.length - 1) {
-			const oldestTagIndex = allTags.indexOf(currentTag);
-			const parentTag = allTags[oldestTagIndex - 1];
-			range = parentTag ? `${parentTag}..${currentTag}` : currentTag;
-		} else {
-			const previousTagInSlice = tags[i + 1];
-			range = `${previousTagInSlice}..${currentTag}`;
-		}
+			let range;
+			if (i === tags.length - 1) {
+				const oldestTagIndex = allTags.indexOf(currentTag);
+				const parentTag = allTags[oldestTagIndex - 1];
+				range = parentTag ? `${parentTag}..${currentTag}` : currentTag;
+			} else {
+				const previousTagInSlice = tags[i + 1];
+				range = `${previousTagInSlice}..${currentTag}`;
+			}
 
-		const rawCommits = run(`git log ${range} --pretty=format:"%h|%s"`).split("\n");
-		const commits = rawCommits
-			.map((line) => {
-				const [hash, ...msgParts] = line.split("|");
-				const message = msgParts.join("|");
-				const classified = classifyCommit(message);
-				if (!classified) return null;
-				return { ...classified, hash };
-			})
-			.filter(Boolean);
+			const rawCommits = run(`git log ${range} --pretty=format:"%h|%s"`).split("\n");
+			const commits = rawCommits
+				.map(line => {
+					const [hash, ...msgParts] = line.split("|");
+					const message = msgParts.join("|");
+					const classified = classifyCommit(message);
+					if (!classified) return null;
+					return { ...classified, hash };
+				})
+				.filter(Boolean);
 
-		if (commits.length === 0) continue;
+			if (commits.length === 0) continue;
 
-		const tagDateRaw = run(`git log -1 --format=%ad --date=short ${currentTag}`);
-		const tagDateFormatted = formatDate(tagDateRaw);
+			const tagDateRaw = run(`git log -1 --format=%ad --date=short ${currentTag}`);
+			const tagDateFormatted = formatDate(tagDateRaw);
 
-		changelog += `## [${releaseTitle}](${REPO_URL}/tree/${currentTag}) ${tagDateFormatted}\n\n`;
+			changelog += `## [${releaseTitle}](${REPO_URL}/tree/${currentTag}) ${tagDateFormatted}\n\n`;
 
-		const groups = {};
-		for (const c of commits) {
-			groups[c.group] = groups[c.group] || [];
-			groups[c.group].push(`* ${linkPR(cleanMessage(c.message))} ([${c.hash}](${REPO_URL}/commit/${c.hash}))`);
-		}
-
-		for (const group of GROUP_ORDER) {
-			if (groups[group]) {
-				changelog += `${group}\n\n${groups[group].join("\n")}\n\n`;
+			const groups = {};
+			for (const c of commits) {
+				groups[c.group] = groups[c.group] || [];
+				groups[c.group].push(`* ${linkPR(cleanMessage(c.message))} ([${c.hash}](${REPO_URL}/commit/${c.hash}))`);
+			}
+			for (const group of GROUP_ORDER) {
+				if (groups[group]) {
+					changelog += `${group}\n\n${groups[group].join("\n")}\n\n`;
+				}
 			}
 		}
 	}
