@@ -60,7 +60,7 @@ android {
             resValue("string", "app_name", "BorderBound Dev")
             resValue("string", "app_version", versionNameStr)
             resValue("string", "empty", "")
-            buildConfigField("boolean", "DEBUG_LEVELS", "false")
+            buildConfigField("boolean", "DEBUG_LEVELS", "true")
         }
 
         getByName("release") {
