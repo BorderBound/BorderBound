@@ -134,6 +134,20 @@ android {
         dependsOn("compressLevelFile")
     }
 
+    tasks.register("deleteCompressedLevelFiles") {
+        doLast {
+            project.delete(
+                project.fileTree("$projectDir/src/main/assets") {
+                    include("**/*.compressed")
+                }
+            )
+        }
+    }
+
+    tasks.matching { it.name.startsWith("assemble") }.configureEach {
+        finalizedBy("deleteCompressedLevelFiles")
+    }
+
 }
 
 kotlin {
