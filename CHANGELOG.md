@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Replace BFS solver with A* ([ab1eab9](https://github.com/BorderBound/BorderBound/commit/ab1eab9))
 * Remove unsolved levels and clean up level files ([e642cdb](https://github.com/BorderBound/BorderBound/commit/e642cdb))
 * Apply standard XML formatting ([46ee85c](https://github.com/BorderBound/BorderBound/commit/46ee85c))
 * Renumber levels and add sorting script ([d696fc8](https://github.com/BorderBound/BorderBound/commit/d696fc8))
