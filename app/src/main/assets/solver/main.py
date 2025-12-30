@@ -24,13 +24,14 @@ def main():
     for level_number, attrs in enumerate(levels):
         color = attrs["color"]
         modifier = attrs["modifier"]
-        print(f"\nLevel {level_number}:")
+        print(f"\nFinding Level {level_number} Solution...")
 
         board = Board.from_strings(color, modifier)
 
         solved_board = branch_bound_solver(board)
         if solved_board:
             print(f"Solution found: {solved_board.move_sequence}")
+            print(f"Level {level_number}:")
 
             print("Completed board:")
             board.display()  # make sure Board has a display method
