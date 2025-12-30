@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
 <levels>
-
     <level color="bbbbbb rbbbbb rrbbbb rrrbbb rrrrbb rrrrrr bbbbbr 000000"
            modifier="00000L 00000L 00000L 00000L 00000L 000000 UUUUUF XXXXXX"
            number="0"
@@ -181,31 +180,15 @@
            number="35"
            solution="A3,C7,F5,A3,A6,E1,A6,F2,F2,E6,C1,B2" />
 
-    <level color="rggggg rrrrgr rrgggr rrrrgr rogggb oooogb rogggb oooorb"
-           modifier="FD000F 00000L R00000 000000 R00000 000000 R00000 F000UF"
-           number="36" />
-
     <level color="rrrrrr boooor bgrrrr bggrrr bgggrr bggggr bggggg gggrgr"
            modifier="000000 0000L0 0F0000 0R000D 0R0000 0R0000 UR0000 000UUF"
            number="37"
            solution="B3,B6,B7,E8,B5,B3,D8,B4,F8,D8,E2,B5,F8,F8,E2,F4,A7,E2,E8,B7,F4,B6" />
 
-    <level color="bobobo obobob bobobo obobob bobobo oddddb ddbodd obbbbd"
-           modifier="R0000L R0000L R0000L R0000L R0000L R0000L 000000 FUUUUF"
-           number="38" />
-
     <level color="0obgo0 bgbooo ogbooo bgoooo bgbooo ggbogg ggbogg 0gbog0"
            modifier="XDDD0X F00000 F00000 R00000 R00000 000000 000000 XF000X"
            number="39"
            solution="A5,B8,A5,D1,D1,B8,C1,A4,B8,A4,A3,B8,B1,B8" />
-
-    <level color="0gord0 rrrggg gggroo ogoroo dgobgg borddd gogbrr 0orbb0"
-           modifier="XDDDDX R0000L R0000L R0000L R0000L R0000L R0000L XUUUUX"
-           number="40" />
-
-    <level color="rrbgrr rgggrb rgrrrb rggrgb rrgggb rggrgb rrrrgg bbbbbg"
-           modifier="F0FF0F 00000L 00000L 00000L 00000L 00000L 000000 UUUUU0"
-           number="41" />
 
     <level color="dddggo ddrggo dbrggo dbrogo ddrooo ddroog rrrrro 0rbgo0"
            modifier="FdDoob dddbdd dbdbrr dbddLr dgdggg dgdbrU R0000L XFFFFX"
@@ -241,10 +224,6 @@
            modifier="F0F000 F0DXX0 F00XX0 XXro0L XXog0L 00grXX 0X0XXX 00UXXX"
            number="48"
            solution="C2,C2,A2,A2,A3,A3,C8,F5,F4,C8,C1,C8,C1,A3,F5,A3,C2,F5,C2,A2,F4,A2,C2,F4,C1" />
-
-    <level color="rrbgg0 grrrrb brbgoo brrrrg oobgrg grrrrb rbbgrr rrrrrr"
-           modifier="F000DX R0000L 00w00L R0000L R00s00 R0000L 0U000L 000000"
-           number="49" />
 
     <level color="rroob0 rroob0 ggoob0 ggobb0 ggobb0 bboddb oooodd oobobd"
            modifier="00000X 0B0B0X 00000X 0B0B0X 00000X R0000L 000000 F0U0UF"

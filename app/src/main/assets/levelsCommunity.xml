@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
 <levels>
-
     <level color="ddrrdr drrrdr rrrrdr ddrrrr rrrrrr rrrrrr rrrrrr rrrrrr"
            modifier="0000L0 0000L0 0000L0 UU0000 000000 000000 000000 F00000"
            number="0"
@@ -10,10 +9,6 @@
            modifier="0000s 0000x 0000L 00F00 000a0 xF00F"
            number="1"
            solution="A6,A6,E2,E2,E6,E2,A6,E6,A6,D5,E3,D5,B6,E6,E3,C4" />
-
-    <level color="ooogbb ooogbb rgggbb rgggrb rgggrb rrrrrr rrrrrr rroggr"
-           modifier="w00000 0000BB 0s000w 0BB000 000000 0a0000 000000 F0Fs00"
-           number="2" />
 
     <level color="bbbrr bbbrr boogg ooogg roogg rrrrr"
            modifier="DB0B0 0B0B0 BB0B0 B0BFB 0000L F00UB"
@@ -35,6 +30,11 @@
            number="6"
            solution="C5,E6,D2,D2,A5,B1,C3,B1,A5" />
 
+    <level color="gggggr brrrbr rrrrbr borrrr rrrrrr rrrrrr rrrrrr rrrrrr"
+           modifier="0000L0 0000L0 0000L0 UU0000 000000 000000 000000 F00000"
+           number="136"
+           solution="E1,A4,E3,E3,A8" />
+
     <level color="boobo rorrr rrrbb robrr dddrr rrddd"
            modifier="D0DFF 00000 0000L 0U00F d000L 0UUdF"
            number="7"
@@ -44,10 +44,6 @@
            modifier="00D00X 00000X 00000X R000LX 00000X 00000X FFUFFX XXXXXX"
            number="8"
            solution="A7,C7,A7,A4,A7,A4,A7,E7,E4,E7,C1,C1,B7,E4,E4,D7" />
-
-    <level color="bddddb bbddbb bobbob bddddb bddddb bddddb bddddb bddddb"
-           modifier="x0xa0a 0D00D0 0BDDB0 0a00x0 0a00x0 0a00x0 0a00x0 0a00x0"
-           number="9" />
 
     <level color="bbbbb bbdbb bbbbb ooooo ooroo ooooo"
            modifier="rdFrd ddFrr wbbbb soooo rrFdd drFdr"
@@ -109,10 +105,6 @@
            number="21"
            solution="B2,F7,D8,F7,E2,F7,A5,F6,B2,A4,E2,B2,D2" />
 
-    <level color="dddodo dooodo ddoodo dbbbdd oboboo obbbod ododod oddddd"
-           modifier="F00D00 00000w 00o000 0a000F 00o00o 0s0x00 00o0U0 U0000F"
-           number="22" />
-
     <level color="rrgrr rrrrr rrrrr rrrrr rgrgr rrrrr"
            modifier="0DFD0 00000 00B00 00000 00F00 00w00"
            number="23"
@@ -168,42 +160,10 @@
            number="33"
            solution="C4,B6,A3,C4,D1,A3,B6,A3,A3,E5,C4,D2,D2,D2,B6,C4,B6,A3,E6" />
 
-    <level color="drdbdd rrrrdd drordg drordg bddddg rggobo rggbbb rggbdb"
-           modifier="DD0F0F 00000L 000000 00000F R0000L 000s0F 000000 F000U0"
-           number="34" />
-
-    <level color="dogrdb rrrrrr rrgrrr drooor rrodog groood grrrrr ordrbr"
-           modifier="FDg0DF 000000 00F000 R0bbbB 00dgdg B0bbbL g00000 F0U0bF"
-           number="35" />
-
-    <level color="ggbbb goroo ddrrd rddrb rrrro rrogo"
-           modifier="rgBrF Ro0BL odgrL 0wobF 0b00F FUwFg"
-           number="36" />
-
-    <level color="bbggdb bbgddd gbgggb bggbob oooggg ggrdbd ddrddd bdbdod"
-           modifier="FD000L 00000L R0B000 000000 R0000L F000U0 F0w000 R00UF0"
-           number="37" />
-
     <level color="bbbbr rooor roror roror roooo rbbbb"
            modifier="000xx 0F000 00D00 00000 0000L xx000"
            number="38"
            solution="B2,D1,A6,D1,A6,B2,A6,D1,A6,E5,E1,E1,C3,B2,B6" />
-
-    <level color="oorbgd rrrbbb dbrobr obdooo gboodd bbddgg rrdrrg gddrgg"
-           modifier="oDDFDF 000000 R00w0F 00000F R0000L R00000 R00000 F00000"
-           number="39" />
-
-    <level color="0obgd0 oggggg boobbd bogdbo dggbod ggdbod 000000 000000"
-           modifier="XFDDDX R0000F F0000F R0000L R00000 00000L XXXXXX XXXXXX"
-           number="40" />
-
-    <level color="gdbrgg grrrgg ggrogg rddbog rdgrdd ddoobb bbddoo bdddoo"
-           modifier="0DD0F0 000000 000w00 R0000L F00000 R00000 Fw0000 000FUF"
-           number="41" />
-
-    <level color="bbbgor rbdgoo oodgbb oodbrr ordbrb drgrrb rrrggb gdrdbb"
-           modifier="00000L 000L0F o0000L 00000F R00000 00w000 000000 FUFFUF"
-           number="42" />
 
     <level color="boooo doddo ddrrd rgggr rgggr dgggr"
            modifier="F0bbb 0000F UU00L 00000 00B00 F000F"
@@ -215,27 +175,11 @@
            number="44"
            solution="B1,B3,E3,D1,C5,E6,C3,A5" />
 
-    <level color="rrgrgg grgrgr gggror oorrgr oorrrr rgrrrr rrrrrr grrrgg"
-           modifier="00000L 000000 0000L0 B000L0 0000L0 FU0000 000w00 F000gU"
-           number="45" />
-
-    <level color="ooroor oorogo grrogo googgo ggggoo gooorr gggrrr rgggro"
-           modifier="00000r 00000L 00000L 0UR00o 0R0000 0R0000 000000 U0FUFF"
-           number="46" />
-
     <level color="bdddr drrrr rrdrr rrrrr rdrbr rrrbr"
            modifier="F0B0F R0d00 00U00 0000D 0B0b0 000wb"
            number="47"
            solution="C1,A2,E1,D6,D6,E4,D6,D6,D6" />
 
-
-    <level color="ddoodg bbbdgg oogobb bbgboo rrrrgr dddbgr ggddrg rgbgrg"
-           modifier="F0DFD0 R00000 R00000 F0B000 R00000 R0B000 R00000 F0UUUF"
-           number="48" />
-
-    <level color="g0rr0r 0bbbb0 bbgg0b brgrrr bbgrrr rgrrgg 0rrgg0 r0rg0b"
-           modifier="BX0sXB XB00FX B0x0X0 x000B0 00000a 0g0a00 XF00BX BXUFXB"
-           number="49" />
 
     <level color="oogoo ogrgo ggrog roooo gorgg 0grg0"
            modifier="0FDF0 00000 R0000 R0B0F R0000 XUUUX"
@@ -243,12 +187,4 @@
            solution="D6,C1,B6,B1,A3,A3,E4,C1,D1,C4,E4,A5,B6,C1,A4,C1,C6,A4,A3,E4" />
 
 
-    <level color="d0d0d ddrdd rrrrd bbbbb 0drd0 d0r0d"
-           modifier="0XDX0 00000 R000F R0000 Xr0rX BXUXB"
-           number="51" />
-
-
-    <level color="0b0boo bddgoo dd0gro d00dro drdd0o dddd0o gddd0b bo0000"
-           modifier="X0XF00 R0FFF0 00X000 0XX0a0 0DgoX0 0000X0 g0o0Xb boXXXX"
-           number="52" />
 </levels>
