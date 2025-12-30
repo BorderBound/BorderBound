@@ -14,9 +14,10 @@ import com.github.codeworkscreativehub.borderbound.model.LevelPack;
 abstract public class State {
     static final int STEPS_NOT_SOLVED = 999;
     private static final int UNLOCK_NEXT_LEVELS;
+
     static {
         if (BuildConfig.DEBUG_LEVELS) {
-            UNLOCK_NEXT_LEVELS = 100;
+            UNLOCK_NEXT_LEVELS = 500;
         } else {
             UNLOCK_NEXT_LEVELS = 5;
         }
@@ -54,25 +55,25 @@ abstract public class State {
     }
 
     void makePlayed(int level) {
-        playedPrefs.edit().putBoolean("l"+level, true).apply();
+        playedPrefs.edit().putBoolean("l" + level, true).apply();
     }
 
     void makeUnPlayed(int level) {
-        playedPrefs.edit().putBoolean("l"+level, false).apply();
+        playedPrefs.edit().putBoolean("l" + level, false).apply();
     }
 
     void saveSteps(int level, int steps) {
-        if (playedPrefs.getInt("s"+level, STEPS_NOT_SOLVED) > steps) {
-            playedPrefs.edit().putInt("s"+level, steps).apply();
+        if (playedPrefs.getInt("s" + level, STEPS_NOT_SOLVED) > steps) {
+            playedPrefs.edit().putInt("s" + level, steps).apply();
         }
     }
 
     public int loadSteps(int level) {
-        return playedPrefs.getInt("s"+level, STEPS_NOT_SOLVED);
+        return playedPrefs.getInt("s" + level, STEPS_NOT_SOLVED);
     }
 
-    public boolean isSolved (int level) {
-        return playedPrefs.getBoolean("l"+level, false);
+    public boolean isSolved(int level) {
+        return playedPrefs.getBoolean("l" + level, false);
     }
 
     SharedPreferences getPreferences() {
@@ -80,26 +81,38 @@ abstract public class State {
     }
 
     public boolean isPlayable(Level level) {
+        Level current = level;
+
+        // Debug override: unlock everything
+        if (BuildConfig.DEBUG_LEVELS) {
+            return true;
+        }
+
         for (int i = 0; i <= UNLOCK_NEXT_LEVELS; i++) {
-            if (level.getIndexInPack() == 0) {
-                if (level.getPack() == LevelPack.EASY) {
-                    return true;
-                } else if (level.getPack() == LevelPack.MEDIUM) {
-                    return isSolved(LevelPack.EASY.getLevel(0).getNumber());
-                } else if (level.getPack() == LevelPack.HARD) {
-                    return isSolved(LevelPack.MEDIUM.getLevel(0).getNumber());
-                } else if (level.getPack() == LevelPack.COMMUNITY) {
-                    return isSolved(LevelPack.MEDIUM.getLevel(0).getNumber());
-                }
-                return false;
-            } else if (isSolved(level.getNumber())) {
+
+            // First level in pack
+            if (current.getIndexInPack() == 0) {
+                return isFirstLevelPlayable(current.getPack());
+            }
+
+            // Any solved previous level unlocks this one
+            if (isSolved(current.getNumber())) {
                 return true;
             }
-            level = level.getPack().getLevel(level.getIndexInPack() - 1);
+
+            // Move to previous level
+            current = current.getPack().getLevel(current.getIndexInPack() - 1);
         }
+
         return false;
     }
 
+    private boolean isFirstLevelPlayable(LevelPack pack) {
+        return pack.isEasy()
+                || (pack.isMedium() && isSolved(LevelPack.EASY.getFirstLevel().getNumber()))
+                || ((pack.isHard() || pack.isCommunity()) && isSolved(LevelPack.MEDIUM.getFirstLevel().getNumber()));
+    }
+    
     public float getScreenWidth() {
         return screenWidth;
     }
@@ -109,7 +122,7 @@ abstract public class State {
     }
 
     public void playSound(int resId) {
-        if(getPreferences().getBoolean("volumeOn", true)) {
+        if (getPreferences().getBoolean("volumeOn", true)) {
             soundPool.playSound(resId);
         }
     }
