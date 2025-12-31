@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Improve solver script logic and structure ([ea1c6ac](https://github.com/BorderBound/BorderBound/commit/ea1c6ac))
 * Improve parallel solver with a timeout after the first solution ([57003ab](https://github.com/BorderBound/BorderBound/commit/57003ab))
 * Renumber levels sequentially ([2333f94](https://github.com/BorderBound/BorderBound/commit/2333f94))
 * Replace BFS solver with A* ([ab1eab9](https://github.com/BorderBound/BorderBound/commit/ab1eab9))
