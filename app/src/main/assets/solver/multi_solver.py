@@ -5,6 +5,7 @@ import itertools
 import copy
 from collections import deque
 import heapq
+import time
 
 
 # ------------------------------
@@ -142,7 +143,7 @@ def branch_bound_solver(initial_board: Board):
 
 
 # ------------------------------
-# Parallel solver with immediate printing
+# Parallel solver with timeout after first solution
 # ------------------------------
 def _solver_worker(board, solver_func, solver_name, return_dict):
     solution = solver_func(board)
@@ -154,29 +155,58 @@ def _solver_worker(board, solver_func, solver_name, return_dict):
     return solution
 
 
-def solve_with_all_strategies_parallel(board: Board):
+def solve_with_all_strategies_parallel(board: Board, wait_after_first=120):
     """
-    Runs DFS, BFS, and A* in parallel and returns the shortest solution.
-    Prints each solver's result immediately.
+    Runs DFS, BFS, and A* in parallel.
+    Returns the shortest solution found.
+    If a solution is found, waits up to wait_after_first seconds
+    for possibly better solutions, then cancels remaining solvers
+    and returns the best solution so far.
     """
     solvers = [("DFS", dfs_solver), ("BFS", bfs_solver), ("A*", branch_bound_solver)]
-
     manager = Manager()
     return_dict = manager.dict()
 
-    with Pool(processes=len(solvers)) as pool:
-        results = []
+    pool = Pool(processes=len(solvers))
+    results = []
+    try:
         for name, func in solvers:
             r = pool.apply_async(_solver_worker, args=(board, func, name, return_dict))
-            results.append(r)
+            results.append((name, r))
 
-        # Wait for all solvers to complete
-        for r in results:
-            r.wait()
+        first_solution_time = None
+        while True:
+            # Check if any solver has finished and record first solution time
+            if return_dict and first_solution_time is None:
+                first_solution_time = time.time()
 
-    # Collect solutions from the return_dict
+            # Timeout reached after first solution
+            if first_solution_time is not None:
+                elapsed = time.time() - first_solution_time
+                if elapsed >= wait_after_first:
+                    print(
+                        f"# Timeout reached ({wait_after_first}s) after first solution"
+                    )
+                    # Cancel all remaining tasks
+                    pool.terminate()
+                    pool.join()
+                    break
+
+            # All solvers finished naturally
+            if all(r[1].ready() for r in results):
+                pool.close()
+                pool.join()
+                break
+
+            time.sleep(0.1)
+
+    except KeyboardInterrupt:
+        pool.terminate()
+        pool.join()
+        raise
+
+    # Collect solutions from return_dict
     solutions = list(return_dict.values())
-
     if not solutions:
         print("# No solution found by any strategy")
         return None
