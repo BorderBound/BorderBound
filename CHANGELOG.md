@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :sparkles: Enhancements:
 
+* Add solution verification and comparison to solver ([19e0c67](https://github.com/BorderBound/BorderBound/commit/19e0c67))
 * Add command-line option to select levels in solver ([a819a08](https://github.com/BorderBound/BorderBound/commit/a819a08))
 * Implement parallel multi-strategy solver ([d16337a](https://github.com/BorderBound/BorderBound/commit/d16337a))
 * Add initial puzzle solver implementation ([4fd5347](https://github.com/BorderBound/BorderBound/commit/4fd5347))
@@ -18,6 +19,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Improve parallel solver with a timeout after the first solution ([57003ab](https://github.com/BorderBound/BorderBound/commit/57003ab))
 * Renumber levels sequentially ([2333f94](https://github.com/BorderBound/BorderBound/commit/2333f94))
 * Replace BFS solver with A* ([ab1eab9](https://github.com/BorderBound/BorderBound/commit/ab1eab9))
 * Remove unsolved levels and clean up level files ([e642cdb](https://github.com/BorderBound/BorderBound/commit/e642cdb))
