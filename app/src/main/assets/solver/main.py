@@ -2,7 +2,9 @@
 import sys
 from simple_xml import SimpleXml
 from board import Board
-from branch_bound_solver import branch_bound_solver
+from multi_solver import (
+    solve_with_all_strategies_parallel,
+)  # use the new multi-strategy solver
 
 
 def main():
@@ -28,11 +30,11 @@ def main():
 
         board = Board.from_strings(color, modifier)
 
-        solved_board = branch_bound_solver(board)
+        # Use multi-strategy solver
+        solved_board = solve_with_all_strategies_parallel(board)
         if solved_board:
             print(f"Solution found: {solved_board.move_sequence}")
             print(f"Level {level_number}:")
-
             print("Completed board:")
             board.display()  # make sure Board has a display method
         else:
