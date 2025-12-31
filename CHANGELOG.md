@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :sparkles: Enhancements:
 
+* Implement parallel multi-strategy solver ([d16337a](https://github.com/BorderBound/BorderBound/commit/d16337a))
 * Add initial puzzle solver implementation ([4fd5347](https://github.com/BorderBound/BorderBound/commit/4fd5347))
 * Clean up compressed level files after build ([3b3f5d7](https://github.com/BorderBound/BorderBound/commit/3b3f5d7))
 * Configure Dependabot for Gradle and GitHub Actions ([3cd7c75](https://github.com/BorderBound/BorderBound/commit/3cd7c75))
