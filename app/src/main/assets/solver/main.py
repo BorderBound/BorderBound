@@ -5,31 +5,42 @@ from board import Board
 from multi_solver import solve_with_all_strategies_parallel
 
 
+# ------------------------------
+# Helpers
+# ------------------------------
+def parse_move(move: str):
+    col = ord(move[0].upper()) - ord("A")
+    row = int(move[1:]) - 1
+    return row, col
+
+
 def replay_solution(board: Board, solution_str: str):
     b = board.copy()
-
     for move in solution_str.split(","):
         r, c = parse_move(move)
         changed = b.click(r, c)
         if not changed:
-            raise ValueError(f"Invalid move in solution: {move}")
-
+            raise ValueError(f"Invalid move: {move}")
     return b
 
 
-def parse_move(move: str):
-    """
-    Converts 'A3' → (row, col)
-    """
-    col_char = move[0].upper()
-    row_num = int(move[1:])
-
-    col = ord(col_char) - ord("A")
-    row = row_num - 1
-
-    return row, col
+def count_moves(solution_str: str) -> int:
+    return len([m for m in solution_str.split(",") if m])
 
 
+def try_existing_solution(board: Board, solution_str: str):
+    try:
+        solved = replay_solution(board, solution_str)
+        if solved.is_solved():
+            return solved
+    except Exception:
+        pass
+    return None
+
+
+# ------------------------------
+# Main
+# ------------------------------
 def main():
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} <levels.xml> [level_number[+]]")
@@ -40,6 +51,7 @@ def main():
 
     level_to_start = None
     continue_after = False
+
     if level_arg:
         if level_arg.endswith("+"):
             level_to_start = int(level_arg[:-1])
@@ -66,47 +78,61 @@ def main():
                 if level_number != level_to_start:
                     continue
 
-        color = attrs["color"]
-        modifier = attrs["modifier"]
-        existing_solution = attrs.get("solution")
-
         print(f"\nFinding Level {level_number} Solution...")
 
-        board = Board.from_strings(color, modifier)
+        board = Board.from_strings(attrs["color"], attrs["modifier"])
 
-        # --- Test existing solution if present ---
+        # ------------------------------
+        # Test existing solution
+        # ------------------------------
+        existing_solution = attrs.get("solution")
+        existing_board = None
         existing_moves = None
+
         if existing_solution:
-            test_board = replay_solution(board, existing_solution)
-            if test_board.is_solved():
-                existing_moves = len(existing_solution.split(","))
-                print(f"# Existing solution: {existing_moves} moves")
+            existing_board = try_existing_solution(board, existing_solution)
+            if existing_board:
+                existing_moves = count_moves(existing_solution)
+                print(f"# Existing solution valid ({existing_moves} moves)")
             else:
-                print("# Existing solution is INVALID")
+                print("# Existing solution INVALID")
 
-        # --- Run solver ---
-        solved_board = solve_with_all_strategies_parallel(board)
+        # ------------------------------
+        # Run solvers
+        # ------------------------------
+        new_board = solve_with_all_strategies_parallel(board)
 
-        if not solved_board:
-            print("No solution found.")
-            continue
+        # ------------------------------
+        # Choose best
+        # ------------------------------
+        chosen_board = None
 
-        new_moves = solved_board.move_sequence.n
-        print(f"# Solver found: {new_moves} moves")
+        if new_board and existing_board:
+            if new_board.move_sequence.n < existing_moves:
+                print("# New solution is better")
+                chosen_board = new_board
+            else:
+                print("# Keeping existing solution")
+                chosen_board = existing_board
 
-        # --- Compare ---
-        if existing_moves is None:
-            print("# New solution (no previous solution)")
-        elif new_moves < existing_moves:
-            print(f"# BETTER solution found ({existing_moves} -> {new_moves})")
-        elif new_moves == existing_moves:
-            print("# Solution matches existing length")
+        elif new_board:
+            print("# Using new solution")
+            chosen_board = new_board
+
+        elif existing_board:
+            print("# Solver failed, keeping existing solution")
+            chosen_board = existing_board
+
         else:
-            print(f"# Worse than existing ({existing_moves} <- {new_moves})")
+            print("# No solution found")
 
-        print(f"Solution: {solved_board.move_sequence}")
-        print("Completed board:")
-        board.display()
+        # ------------------------------
+        # Output
+        # ------------------------------
+        if chosen_board:
+            print(f"Solution: {chosen_board.move_sequence}")
+            print("Completed board:")
+            chosen_board.display()
 
         print()
         input("# Press Enter to continue after solution...")

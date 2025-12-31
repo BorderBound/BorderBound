@@ -155,7 +155,7 @@ def _solver_worker(board, solver_func, solver_name, return_dict):
     return solution
 
 
-def solve_with_all_strategies_parallel(board: Board, wait_after_first=120):
+def solve_with_all_strategies_parallel(board: Board, wait_after_first=300):
     """
     Runs DFS, BFS, and A* in parallel.
     Returns the shortest solution found.
