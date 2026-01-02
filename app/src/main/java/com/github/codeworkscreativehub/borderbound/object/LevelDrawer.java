@@ -88,59 +88,38 @@ public class LevelDrawer extends Drawable {
     }
 
     private Plane getModifierPlane(Modifier modifier) {
-        switch (modifier) {
-            case DARK:
-                return modifiers[0];
-            case GREEN:
-                return modifiers[1];
-            case BLUE:
-                return modifiers[2];
-            case ORANGE:
-                return modifiers[3];
-            case RED:
-                return modifiers[4];
-            case FLOOD:
-                return modifiers[5];
-            case EMPTY:
-                return modifiers[6];
-            case UP:
-                return modifiers[8];
-            case RIGHT:
-                return modifiers[9];
-            case LEFT:
-                return modifiers[10];
-            case DOWN:
-                return modifiers[11];
-            case ROTATE_UP:
-                return modifiers[13];
-            case ROTATE_RIGHT:
-                return modifiers[14];
-            case ROTATE_LEFT:
-                return modifiers[15];
-            case ROTATE_DOWN:
-                return modifiers[16];
-            case BOMB:
-                return modifiers[12];
-            default: // empty
-                return modifiers[7];
-        }
+        return switch (modifier) {
+            case DARK -> modifiers[0];
+            case GREEN -> modifiers[1];
+            case BLUE -> modifiers[2];
+            case ORANGE -> modifiers[3];
+            case RED -> modifiers[4];
+            case FLOOD -> modifiers[5];
+            case EMPTY -> modifiers[6];
+            case UP -> modifiers[8];
+            case RIGHT -> modifiers[9];
+            case LEFT -> modifiers[10];
+            case DOWN -> modifiers[11];
+            case ROTATE_UP -> modifiers[13];
+            case ROTATE_RIGHT -> modifiers[14];
+            case ROTATE_LEFT -> modifiers[15];
+            case ROTATE_DOWN -> modifiers[16];
+            case BOMB -> modifiers[12];
+            default -> // empty
+                    modifiers[7];
+        };
     }
 
     private Plane getColorPlane(Color color) {
-        switch (color) {
-            case DARK:
-                return colors[0];
-            case GREEN:
-                return colors[1];
-            case BLUE:
-                return colors[2];
-            case ORANGE:
-                return colors[3];
-            case RED:
-                return colors[4];
-            default: // empty
-                return colors[5];
-        }
+        return switch (color) {
+            case DARK -> colors[0];
+            case GREEN -> colors[1];
+            case BLUE -> colors[2];
+            case ORANGE -> colors[3];
+            case RED -> colors[4];
+            default -> // empty
+                    colors[5];
+        };
     }
 
     public synchronized void setLevel(Level level) {
