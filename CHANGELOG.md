@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Modernize switch statements in LevelDrawer ([b92e9ef](https://github.com/BorderBound/BorderBound/commit/b92e9ef))
 * Improve solver script logic and structure ([ea1c6ac](https://github.com/BorderBound/BorderBound/commit/ea1c6ac))
 * Improve parallel solver with a timeout after the first solution ([57003ab](https://github.com/BorderBound/BorderBound/commit/57003ab))
 * Renumber levels sequentially ([2333f94](https://github.com/BorderBound/BorderBound/commit/2333f94))
@@ -28,6 +29,10 @@ All notable changes to this project will be documented in this file. See [conven
 * Renumber levels and add sorting script ([d696fc8](https://github.com/BorderBound/BorderBound/commit/d696fc8))
 * Update project name and modernize code ([94e7dc4](https://github.com/BorderBound/BorderBound/commit/94e7dc4))
 * Simplify level unlock logic and improve readability ([c27c03a](https://github.com/BorderBound/BorderBound/commit/c27c03a))
+
+### :x: Feature Removals:
+
+* Remove folder to replace with submodule ([130a72f](https://github.com/BorderBound/BorderBound/commit/130a72f))
 
 ### :broom: Maintenance & Cleanup:
 
