@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [0.1.0.0 → Unreleased](https://github.com/BorderBound/BorderBound/tree/main) - In Development
+
+### :sparkles: Enhancements:
+
+* Add and update solutions in XML ([ee7ea0b](https://github.com/BorderBound/BorderBound/commit/ee7ea0b))
+
 ## [10000 (0.1.0 build 0) - BorderBound](https://github.com/BorderBound/BorderBound/tree/0.1.0.0) - (03, January 2026)
 
 ### :sparkles: Enhancements:
