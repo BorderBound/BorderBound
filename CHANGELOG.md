@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :sparkles: Enhancements:
 
+* Port Python solver to Node.js ([5523709](https://github.com/BorderBound/BorderBound/commit/5523709))
 * Add and update solutions in XML ([ee7ea0b](https://github.com/BorderBound/BorderBound/commit/ee7ea0b))
 
 ## [10000 (0.1.0 build 0) - BorderBound](https://github.com/BorderBound/BorderBound/tree/0.1.0.0) - (03, January 2026)
