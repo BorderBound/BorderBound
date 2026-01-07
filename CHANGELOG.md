@@ -6,9 +6,14 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :sparkles: Enhancements:
 
+* Add GBFS, MCTS, and Enhanced A* solvers ([de4f692](https://github.com/BorderBound/BorderBound/commit/de4f692))
 * Enhance solver with new algorithm and optimizations ([0792986](https://github.com/BorderBound/BorderBound/commit/0792986))
 * Port Python solver to Node.js ([5523709](https://github.com/BorderBound/BorderBound/commit/5523709))
 * Add and update solutions in XML ([ee7ea0b](https://github.com/BorderBound/BorderBound/commit/ee7ea0b))
+
+### :wrench: Code Quality:
+
+* Parallelize solvers using worker threads ([a57e0d9](https://github.com/BorderBound/BorderBound/commit/a57e0d9))
 
 ## [10000 (0.1.0 build 0) - BorderBound](https://github.com/BorderBound/BorderBound/tree/0.1.0.0) - (03, January 2026)
 
