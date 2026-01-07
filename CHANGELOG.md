@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :sparkles: Enhancements:
 
+* Enhance solver with new algorithm and optimizations ([0792986](https://github.com/BorderBound/BorderBound/commit/0792986))
 * Port Python solver to Node.js ([5523709](https://github.com/BorderBound/BorderBound/commit/5523709))
 * Add and update solutions in XML ([ee7ea0b](https://github.com/BorderBound/BorderBound/commit/ee7ea0b))
 
