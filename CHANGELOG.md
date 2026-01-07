@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :sparkles: Enhancements:
 
+* Add GBFS, MCTS, and Enhanced A* solvers ([378ff80](https://github.com/BorderBound/BorderBound/commit/378ff80))
+* Add GBFS, MCTS, and Enhanced A* solvers ([85694d3](https://github.com/BorderBound/BorderBound/commit/85694d3))
 * Add GBFS, MCTS, and Enhanced A* solvers ([de4f692](https://github.com/BorderBound/BorderBound/commit/de4f692))
 * Enhance solver with new algorithm and optimizations ([0792986](https://github.com/BorderBound/BorderBound/commit/0792986))
 * Port Python solver to Node.js ([5523709](https://github.com/BorderBound/BorderBound/commit/5523709))
