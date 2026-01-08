@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Enhance script with new features and validation ([05c2a53](https://github.com/BorderBound/BorderBound/commit/05c2a53))
 * Enhance level sorting with numeric ranges and validation ([a852415](https://github.com/BorderBound/BorderBound/commit/a852415))
 * Refine level sorting and reorder levels ([41a9c11](https://github.com/BorderBound/BorderBound/commit/41a9c11))
 
