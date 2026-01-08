@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
+## [0.1.0.1 → Unreleased](https://github.com/BorderBound/BorderBound/tree/main) - In Development
+
+### :wrench: Code Quality:
+
+* Refine level sorting and reorder levels ([41a9c11](https://github.com/BorderBound/BorderBound/commit/41a9c11))
+
 ## [10001 (0.1.0 build 1) - BorderBound](https://github.com/BorderBound/BorderBound/tree/0.1.0.1) - (08, January 2026)
 
 ### :sparkles: Enhancements:
