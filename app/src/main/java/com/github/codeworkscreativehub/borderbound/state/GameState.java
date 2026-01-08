@@ -24,11 +24,10 @@ import com.github.codeworkscreativehub.borderbound.object.TextureCoordinates;
 public class GameState extends State {
     @SuppressLint("StaticFieldLeak")
     private static GameState instance;
+    private final LevelDrawer levelDrawer = LevelDrawer.getInstance();
     private State nextState = this;
-
     private Level level;
     private float boardStartY = 0;
-    private final LevelDrawer levelDrawer = LevelDrawer.getInstance();
     private Plane winMessage;
     private Plane lockedMessage;
     private Plane left;
@@ -41,6 +40,10 @@ public class GameState extends State {
     private Number stepsUsed;
     private Number stepsBest;
     private Number stepsOptimal;
+
+    // New fields for level display
+    private Number levelNumber;
+
     private boolean isFilling = false;
     private boolean won = false;
     private float topBarHeight;
@@ -49,16 +52,12 @@ public class GameState extends State {
     private float topBarPadding;
     private float stepsUsedCurrentYDelta;
     private float stepsUsedBestYDelta;
+    private float currentLevelYDelta;
     private float stepsOptimalYDelta;
     private LastLevelState lastLevelState = LastLevelState.NO_LEVEL;
     private Filler filler;
 
-    private enum LastLevelState {
-        SOLVED, NO_LEVEL, NOT_SOLVED
-    }
-
     private GameState() {
-
     }
 
     public static GameState getInstance() {
@@ -70,19 +69,22 @@ public class GameState extends State {
 
     @Override
     protected void initialize(GLRenderer glRenderer) {
-        topBarHeight = glRenderer.getWidth() / (8 * 0.6f + 6 * 0.2f);
+        topBarHeight = glRenderer.getWidth() / (8 * 0.6f + 8 * 0.2f);
         topButtonSize = 0.6f * topBarHeight;
         topBarPadding = 0.2f * topBarHeight;
         topButtonY = glRenderer.getHeight() - topButtonSize - topBarPadding;
-        stepsUsedCurrentYDelta = topButtonSize * 0.6f;
-        stepsUsedBestYDelta = topButtonSize * 0.1f;
-        stepsOptimalYDelta = topButtonSize * -0.4f;
+        stepsUsedCurrentYDelta = topButtonSize * 0.8f;
+        stepsUsedBestYDelta = topButtonSize * 0.5f;
+        stepsOptimalYDelta = topButtonSize * 0.1f;
+        currentLevelYDelta = topButtonSize * -0.2f;
 
+        // Header background
         TextureCoordinates coordinatesHeader = TextureCoordinates.getFromBlocks(14, 12, 15, 13);
         headerBackground = new Plane(0, glRenderer.getHeight(), glRenderer.getWidth(), topBarHeight, coordinatesHeader);
         headerBackground.setVisible(false);
         glRenderer.addDrawable(headerBackground);
 
+        // Left, Right, Restart buttons
         left = ObjectFactory.createSingleBox(0, 10, topButtonSize);
         left.setX(topBarPadding);
         left.setY(glRenderer.getHeight() + topBarPadding);
@@ -101,49 +103,62 @@ public class GameState extends State {
         restart.setVisible(false);
         glRenderer.addDrawable(restart);
 
+        // Steps improved box
         stepsImproved = ObjectFactory.createSingleBox(4, 10, topBarHeight);
-        stepsImproved.setX(5 * topButtonSize + 1.5f * topBarPadding);
+        stepsImproved.setX(6 * topButtonSize + 5 * topBarPadding);
         stepsImproved.setY(getScreenHeight() - topBarHeight);
         stepsImproved.setVisible(false);
-        stepsImproved.setScale(0);
+        stepsImproved.setScale(2f);
         glRenderer.addDrawable(stepsImproved);
 
+        // Steps numbers
         stepsUsed = new Number();
-        stepsUsed.setFontSize(topButtonSize * 0.35f);
+        stepsUsed.setFontSize((topButtonSize * 0.8f) * 0.35f);
         stepsUsed.setX(5 * topButtonSize + 3 * topBarPadding);
-        stepsUsed.setY(glRenderer.getHeight() + topBarPadding + stepsUsedCurrentYDelta + 0.25f * topButtonSize);
+        stepsUsed.setY(glRenderer.getHeight() + topBarPadding + stepsUsedCurrentYDelta + 0.25f * (topButtonSize * 0.8f));
         glRenderer.addDrawable(stepsUsed);
 
         stepsBest = new Number();
-        stepsBest.setFontSize(topButtonSize * 0.35f);
+        stepsBest.setFontSize((topButtonSize * 0.8f) * 0.35f);
         stepsBest.setX(5 * topButtonSize + 3 * topBarPadding);
-        stepsBest.setY(glRenderer.getHeight() + topBarPadding + stepsUsedBestYDelta + 0.25f * topButtonSize);
+        stepsBest.setY(glRenderer.getHeight() + topBarPadding + stepsUsedBestYDelta + 0.25f * (topButtonSize * 0.8f));
         glRenderer.addDrawable(stepsBest);
 
         stepsOptimal = new Number();
-        stepsOptimal.setFontSize(topButtonSize * 0.35f);
+        stepsOptimal.setFontSize((topButtonSize * 0.8f) * 0.35f);
         stepsOptimal.setX(5 * topButtonSize + 3 * topBarPadding);
-        stepsOptimal.setY(glRenderer.getHeight() + topBarPadding + stepsOptimalYDelta + 0.25f * topButtonSize);
+        stepsOptimal.setY(glRenderer.getHeight() + topBarPadding + stepsOptimalYDelta + 0.25f * (topButtonSize * 0.8f));
         glRenderer.addDrawable(stepsOptimal);
 
+        // Level number
+        levelNumber = new Number();
+        levelNumber.setFontSize((topButtonSize * 0.8f) * 0.35f);
+        levelNumber.setX(5 * topButtonSize + 3 * topBarPadding);
+        levelNumber.setY(glRenderer.getHeight() + topBarPadding + currentLevelYDelta + 0.5f * (topButtonSize * 0.8f));
+        glRenderer.addDrawable(levelNumber);
+
+        // Steps label
         TextureCoordinates coordinateSteps = TextureCoordinates.getFromBlocks(12, 10, 15, 12);
-        stepsLabel = new Plane(0, 0, 3 * topButtonSize, 2 * topButtonSize, coordinateSteps);
-        stepsLabel.setX(2 * topButtonSize + 3 * topBarPadding);
-        stepsLabel.setY(glRenderer.getHeight() + topBarPadding - 0.75f * topButtonSize);
+        stepsLabel = new Plane(0, 0, 3 * (topButtonSize * 0.8f), 2 * (topButtonSize * 0.8f), coordinateSteps);
+        stepsLabel.setX(2 * topButtonSize + 4 * topBarPadding);
+        stepsLabel.setY(glRenderer.getHeight() + topBarPadding + 0.2f * (topButtonSize * 0.8f));
         stepsLabel.setVisible(false);
         glRenderer.addDrawable(stepsLabel);
 
+        // Solved box
         solved = ObjectFactory.createSingleBox(3, 10, topButtonSize);
-        solved.setX(6 * topButtonSize + 4 * topBarPadding);
+        solved.setX(6 * topButtonSize + 6 * topBarPadding);
         solved.setY(glRenderer.getHeight() + topBarPadding);
         solved.setVisible(false);
         glRenderer.addDrawable(solved);
 
+        // Level drawer
         levelDrawer.setVisible(false);
         levelDrawer.setScreenWidth(getScreenWidth());
         levelDrawer.setX(0);
         glRenderer.addDrawable(levelDrawer);
 
+        // Win and locked messages
         TextureCoordinates coordinatesWin = TextureCoordinates.getFromBlocks(0, 8, 6, 10);
         winMessage = new Plane(0, glRenderer.getHeight(), glRenderer.getWidth(), glRenderer.getWidth() / 3, coordinatesWin);
         winMessage.setVisible(false);
@@ -168,11 +183,14 @@ public class GameState extends State {
         AnimationFactory.startMoveYTo(left, topButtonY);
         AnimationFactory.startMoveYTo(right, topButtonY);
         AnimationFactory.startMoveYTo(restart, topButtonY);
-        AnimationFactory.startMoveYTo(stepsLabel, topButtonY - 0.75f * topButtonSize);
+        AnimationFactory.startMoveYTo(stepsLabel, topButtonY - 0.75f * (topButtonSize * 0.2f));
         AnimationFactory.startMoveYTo(stepsBest, topButtonY + stepsUsedBestYDelta + 0.25f * topButtonSize);
         AnimationFactory.startMoveYTo(stepsUsed, topButtonY + stepsUsedCurrentYDelta + 0.25f * topButtonSize);
         AnimationFactory.startMoveYTo(stepsOptimal, topButtonY + stepsOptimalYDelta + 0.25f * topButtonSize);
         AnimationFactory.startMoveYTo(headerBackground, getScreenHeight() - topBarHeight);
+
+        // Animate new level label and number
+        AnimationFactory.startMoveYTo(levelNumber, topButtonY + currentLevelYDelta + 0.25f * topButtonSize);
     }
 
     private void reloadLevel() {
@@ -192,6 +210,9 @@ public class GameState extends State {
         isFilling = false;
         level.reset();
         levelDrawer.setLevel(level);
+
+        // Set level number
+        levelNumber.setValue(level.getNumber());
 
         float remainingSpace = getScreenHeight() - topBarHeight - levelDrawer.getHeight();
         final float horizontalPaddingDelta = levelDrawer.getBoxSize() / 2;
@@ -228,7 +249,7 @@ public class GameState extends State {
             } else {
                 inAnimation = new TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0);
             }
-            inAnimation.setTo(0, (availableSpace-lockedMessage.getHeight())/2);
+            inAnimation.setTo(0, (availableSpace - lockedMessage.getHeight()) / 2);
             inAnimation.start();
         } else {
             TranslateAnimation outAnimation = new TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0);
@@ -275,7 +296,7 @@ public class GameState extends State {
         AnimationFactory.startMoveYTo(right, getScreenHeight() + topBarPadding);
         AnimationFactory.startMoveYTo(restart, getScreenHeight() + topBarPadding);
         AnimationFactory.startMoveYTo(solved, getScreenHeight() + topBarPadding);
-        AnimationFactory.startMoveYTo(stepsLabel, getScreenHeight() + topBarPadding - 0.75f * topButtonSize);
+        AnimationFactory.startMoveYTo(stepsLabel, getScreenHeight() + topBarPadding - 0.75f * (topButtonSize * 0.2f));
         AnimationFactory.startMoveYTo(stepsBest, getScreenHeight() + topBarPadding
                 + stepsUsedBestYDelta + 0.25f * topButtonSize);
         AnimationFactory.startMoveYTo(stepsUsed, getScreenHeight() + topBarPadding
@@ -285,6 +306,10 @@ public class GameState extends State {
         AnimationFactory.startMoveYTo(headerBackground, getScreenHeight());
         AnimationFactory.startMoveYTo(winMessage, -getScreenWidth() * 0.5f);
         AnimationFactory.startScaleHide(stepsImproved, 0);
+
+        // Hide new level label and number
+        AnimationFactory.startMoveYTo(levelNumber, getScreenHeight() + topBarPadding
+                + currentLevelYDelta + 0.25f * topButtonSize);
 
         TranslateAnimation outAnimation = new TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0);
         outAnimation.setTo(0, -getScreenWidth() * 0.5f);
@@ -345,9 +370,9 @@ public class GameState extends State {
     }
 
     private void wiggle() {
-        new ScaleAnimation(levelDrawer, Animation.DURATION_SHORT/2, 0)
+        new ScaleAnimation(levelDrawer, Animation.DURATION_SHORT / 2, 0)
                 .setTo(0.95f).start();
-        new ScaleAnimation(levelDrawer, Animation.DURATION_SHORT/2, Animation.DURATION_SHORT/2)
+        new ScaleAnimation(levelDrawer, Animation.DURATION_SHORT / 2, Animation.DURATION_SHORT / 2)
                 .setTo(1f).start();
     }
 
@@ -437,5 +462,9 @@ public class GameState extends State {
         leftAnimation.setTo(0);
         leftAnimation.setHideAfter(true);
         leftAnimation.start();
+    }
+
+    private enum LastLevelState {
+        SOLVED, NO_LEVEL, NOT_SOLVED
     }
 }
