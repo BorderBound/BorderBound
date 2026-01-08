@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Update top bar layout and add level display ([b4fd1f2](https://github.com/BorderBound/BorderBound/commit/b4fd1f2))
 * Parallelize solvers using worker threads ([a57e0d9](https://github.com/BorderBound/BorderBound/commit/a57e0d9))
 
 ## [10000 (0.1.0 build 0) - BorderBound](https://github.com/BorderBound/BorderBound/tree/0.1.0.0) - (03, January 2026)
