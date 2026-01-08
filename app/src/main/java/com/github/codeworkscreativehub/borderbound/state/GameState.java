@@ -74,9 +74,9 @@ public class GameState extends State {
         topBarPadding = 0.2f * topBarHeight;
         topButtonY = glRenderer.getHeight() - topButtonSize - topBarPadding;
         stepsUsedCurrentYDelta = topButtonSize * 0.8f;
-        stepsUsedBestYDelta = topButtonSize * 0.5f;
+        stepsUsedBestYDelta = topButtonSize * 0.45f;
         stepsOptimalYDelta = topButtonSize * 0.1f;
-        currentLevelYDelta = topButtonSize * -0.2f;
+        currentLevelYDelta = topButtonSize * -0.25f;
 
         // Header background
         TextureCoordinates coordinatesHeader = TextureCoordinates.getFromBlocks(14, 12, 15, 13);
