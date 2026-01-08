@@ -105,7 +105,7 @@ public class GameState extends State {
 
         // Steps improved box
         stepsImproved = ObjectFactory.createSingleBox(4, 10, topBarHeight);
-        stepsImproved.setX(6 * topButtonSize + 5 * topBarPadding);
+        stepsImproved.setX(6 * topButtonSize + 4 * topBarPadding);
         stepsImproved.setY(getScreenHeight() - topBarHeight);
         stepsImproved.setVisible(false);
         stepsImproved.setScale(2f);
@@ -147,7 +147,7 @@ public class GameState extends State {
 
         // Solved box
         solved = ObjectFactory.createSingleBox(3, 10, topButtonSize);
-        solved.setX(6 * topButtonSize + 6 * topBarPadding);
+        solved.setX(6 * topButtonSize + 5 * topBarPadding);
         solved.setY(glRenderer.getHeight() + topBarPadding);
         solved.setVisible(false);
         glRenderer.addDrawable(solved);
