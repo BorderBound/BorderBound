@@ -4,33 +4,26 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// Top of build.gradle.kts
+// =========================
+//   Version configuration
+// =========================
+
 val major = 0
 val minor = 1
 val patch = 0
 val build = 2
 
-val type = 0 // 1=beta, 2=alpha else=production
+val baseVersionName = "$major.$minor.$patch Build $build"
 
-val baseVersionName = "$major.$minor.$patch"
+val versionCodeBase =
+    (String.format("%02d", major) +
+            String.format("%02d", minor) +
+            String.format("%02d", patch) +
+            String.format("%02d", build)).toInt()
 
-val versionCodeInt =
-    (String.format("%02d", major) + String.format("%02d", minor) + String.format(
-        "%02d",
-        patch
-    ) + String.format("%02d", build)).toInt()
-
-val versionNameStr = when (type) {
-    1 -> "$baseVersionName-beta build $build"
-    2 -> "$baseVersionName-alpha build $build"
-    else -> "$baseVersionName build $build"
-}
-
-val applicationName = when (type) {
-    1 -> "app.borderbound.beta"
-    2 -> "app.borderbound.alpha"
-    else -> "app.borderbound"
-}
+// =========================
+//   Android configuration
+// =========================
 
 android {
     namespace = "com.github.codeworkscreativehub.borderbound"
@@ -39,61 +32,79 @@ android {
     }
 
     defaultConfig {
-        applicationId = applicationName
         minSdk = 28
         targetSdk = 36
-        versionCode = versionCodeInt
-        versionName = versionNameStr
+        versionCode = versionCodeBase
+        versionName = baseVersionName
         buildConfigField("boolean", "DEBUG_LEVELS", "false")
+    }
+
+    flavorDimensions += "channel"
+
+    productFlavors {
+        create("prod") {
+            dimension = "channel"
+            applicationId = "app.borderbound"
+            resValue("string", "app_name", "Border Bound")
+        }
+
+        create("beta") {
+            dimension = "channel"
+            applicationId = "app.borderbound.beta"
+            versionNameSuffix = "-beta"
+            resValue("string", "app_name", "Border Bound Beta")
+        }
+
+        create("alpha") {
+            dimension = "channel"
+            applicationId = "app.borderbound.alpha"
+            versionNameSuffix = "-alpha"
+            resValue("string", "app_name", "Border Bound Alpha")
+        }
+
+        create("nightly") {
+            dimension = "channel"
+            applicationId = "app.borderbound.nightly"
+            versionNameSuffix = "-nightly"
+            resValue("string", "app_name", "Border Bound Nightly")
+        }
     }
 
     buildTypes {
         getByName("debug") {
+            isDebuggable = true
             isMinifyEnabled = false
             isShrinkResources = false
-            isDebuggable = true
             applicationIdSuffix = ".debug"
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            resValue("string", "app_name", "BorderBound Debug")
-            resValue("string", "app_version", versionNameStr)
+
+            resValue("string", "app_version", baseVersionName)
+            resValue("string", "app_name", "Border Bound Debug")
             resValue("string", "empty", "")
-            buildConfigField("boolean", "DEBUG_LEVELS", "true")
         }
 
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            resValue("string", "app_name", "BorderBound")
-            resValue("string", "app_version", versionNameStr)
+
+            resValue("string", "app_version", baseVersionName)
             resValue("string", "empty", "")
         }
     }
 
     applicationVariants.all {
-        if (buildType.name == "release") {
-            outputs.all {
-                val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
-                if (output?.outputFileName?.endsWith(".apk") == true) {
-                    output.outputFileName =
-                        "${defaultConfig.applicationId}_v${defaultConfig.versionName}-Signed.apk"
-                }
-            }
-        }
-        if (buildType.name == "debug") {
-            outputs.all {
-                val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
-                if (output?.outputFileName?.endsWith(".apk") == true) {
-                    output.outputFileName =
-                        "${defaultConfig.applicationId}_v${defaultConfig.versionName}-Debug.apk"
-                }
-            }
+        val flavorName = this.flavorName
+
+        outputs.all {
+            val output =
+                this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
+
+            output.outputFileName =
+                "app_${flavorName}_release.apk"
         }
     }
 
@@ -150,6 +161,10 @@ android {
 
 }
 
+// =========================
+//   Kotlin
+// =========================
+
 kotlin {
     jvmToolchain(17)
 
@@ -157,6 +172,10 @@ kotlin {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
+
+// =========================
+//   Functions
+// =========================
 
 fun compress(path: String) {
     val file = file(path)
@@ -176,6 +195,10 @@ fun compress(path: String) {
 
     file("$path.compressed").writeText(levels)
 }
+
+// =========================
+//   Dependencies
+// =========================
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
