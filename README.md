@@ -1,6 +1,6 @@
 # BorderBound
 
-<img src="https://raw.githubusercontent.com/BorderBound/BorderBound/master/assets/logo.svg" width="150" />
+<img src="https://raw.githubusercontent.com/BorderBound/BorderBound/master/assets/ic_launcher.svg" width="150" />
 
 Easy to learn, hard to master. Play the addicting puzzle game BorderBound now and to think outside the box.
 There are already over 100 levels available and even more to come. The game features a clean and elegant design - you will be amazed by the simplicity and complexity at the same time. 
