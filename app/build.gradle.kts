@@ -52,12 +52,12 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             isDebuggable = true
-            applicationIdSuffix = ".dev"
+            applicationIdSuffix = ".debug"
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            resValue("string", "app_name", "BorderBound Dev")
+            resValue("string", "app_name", "BorderBound Debug")
             resValue("string", "app_version", versionNameStr)
             resValue("string", "empty", "")
             buildConfigField("boolean", "DEBUG_LEVELS", "true")
