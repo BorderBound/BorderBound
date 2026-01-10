@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. See [conven
 
 ## [0.1.0.1 → Unreleased](https://github.com/BorderBound/BorderBound/tree/main) - In Development
 
+### :sparkles: Enhancements:
+
+* Add new color scheme ([90f5e78](https://github.com/BorderBound/BorderBound/commit/90f5e78))
+
 ### :bug: Bug Fixes:
 
 * Fixed Logo ([57f2a64](https://github.com/BorderBound/BorderBound/commit/57f2a64))
