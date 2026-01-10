@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. See [conven
 
 ## [0.1.0.1 → Unreleased](https://github.com/BorderBound/BorderBound/tree/main) - In Development
 
+### :bug: Bug Fixes:
+
+* Fixed Logo ([57f2a64](https://github.com/BorderBound/BorderBound/commit/57f2a64))
+
 ### :wrench: Code Quality:
 
 * Enhance script with new features and validation ([05c2a53](https://github.com/BorderBound/BorderBound/commit/05c2a53))
