@@ -79,6 +79,7 @@ android {
 
             resValue("string", "app_version", baseVersionName)
             resValue("string", "app_name", "Border Bound Debug")
+            buildConfigField("boolean", "DEBUG_LEVELS", "true")
             resValue("string", "empty", "")
         }
 
