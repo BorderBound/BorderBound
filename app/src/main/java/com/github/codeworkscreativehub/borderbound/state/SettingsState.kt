@@ -158,7 +158,7 @@ class SettingsState private constructor() : State() {
             } else if (editorButton.collides(event, getScreenHeight())) {
                 nextState = MainMenuState.getInstance()
                 playSound(R.raw.click)
-                val browserIntent = Intent(Intent.ACTION_VIEW, "https://flowit.bytehamster.com/".toUri())
+                val browserIntent = Intent(Intent.ACTION_VIEW, "https://bb.5646316.xyz/".toUri())
                 getActivity()?.startActivity(browserIntent)
             }
         }
