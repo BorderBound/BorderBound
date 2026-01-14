@@ -1,49 +1,46 @@
-package com.github.codeworkscreativehub.borderbound.animation;
+package com.github.codeworkscreativehub.borderbound.animation
 
-import com.github.codeworkscreativehub.borderbound.object.Drawable;
+import com.github.codeworkscreativehub.borderbound.`object`.Drawable
 
-public class ScaleAnimation extends AnimationSingle {
-    private float from;
-    private float to;
-    private boolean hideAfter = false;
+class ScaleAnimation(
+    mesh: Drawable,
+    duration: Int,
+    startIn: Int
+) : AnimationSingle(mesh, duration, startIn) {
 
-    public ScaleAnimation(Drawable mesh, int duration, int startIn) {
-        super(mesh, duration, startIn);
+    private var from: Float = 0f
+    private var to: Float = 0f
+    private var hideAfter = false
+
+    fun setTo(to: Float): ScaleAnimation {
+        this.to = to
+        return this
     }
 
-    public ScaleAnimation setTo(float to) {
-        this.to = to;
-        return this;
+    fun setHideAfter(hideAfter: Boolean): ScaleAnimation {
+        this.hideAfter = hideAfter
+        return this
     }
 
-    public ScaleAnimation setHideAfter(boolean hideAfter) {
-        this.hideAfter = hideAfter;
-        return this;
+    override fun firstTick() {
+        this.from = subject.scale
     }
 
-    @Override
-    void firstTick() {
-        this.from = getSubject().getScale();
+    override fun tick(percentage: Double) {
+        subject.scale = (from + (to - from) * percentage).toFloat()
     }
 
-    @Override
-    void tick(double percentage) {
-        getSubject().setScale((float) (from + (to - from) * percentage));
-    }
-
-    @Override
-    void finalTick() {
-        getSubject().setScale(to);
+    override fun finalTick() {
+        subject.scale = to
 
         if (hideAfter) {
-            getSubject().setVisible(false);
+            subject.isVisible = false
         }
     }
 
-    @Override
-    ScaleAnimation reverse() {
-        ScaleAnimation reversed = new ScaleAnimation(getSubject(), getDuration(), getDelay());
-        reversed.setTo(from);
-        return reversed;
+    override fun reverse(): ScaleAnimation {
+        val reversed = ScaleAnimation(subject, duration, delay)
+        reversed.setTo(from)
+        return reversed
     }
 }

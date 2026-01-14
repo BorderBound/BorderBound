@@ -1,65 +1,58 @@
-package com.github.codeworkscreativehub.borderbound.filler;
+package com.github.codeworkscreativehub.borderbound.filler
 
-import com.github.codeworkscreativehub.borderbound.Converter;
-import com.github.codeworkscreativehub.borderbound.R;
-import com.github.codeworkscreativehub.borderbound.model.Field;
-import com.github.codeworkscreativehub.borderbound.model.Level;
-import com.github.codeworkscreativehub.borderbound.model.Modifier;
-import com.github.codeworkscreativehub.borderbound.state.State;
+import com.github.codeworkscreativehub.borderbound.Converter
+import com.github.codeworkscreativehub.borderbound.R
+import com.github.codeworkscreativehub.borderbound.model.Level
+import com.github.codeworkscreativehub.borderbound.model.Modifier
+import com.github.codeworkscreativehub.borderbound.state.State
+import kotlin.concurrent.thread
 
-public class BombFiller extends Filler {
-    private Modifier fillTo = Modifier.BLUE;
-    private final Level levelData;
-    private final State state;
-    private final int col, row;
+class BombFiller(
+    private val levelData: Level,
+    private val col: Int,
+    private val row: Int,
+    private val state: State
+) : Filler() {
 
-    BombFiller(Level levelData, int col, int row, State state) {
-        this.levelData = levelData;
-        this.state = state;
-        this.col = col;
-        this.row = row;
-    }
+    private var fillTo: Modifier = Modifier.BLUE
 
-    public void fill() {
-        new Thread() {
-            public void run() {
-                fillTo = Converter.convertColor(levelData.fieldAt(col, row).getColor());
+    override fun fill() {
+        thread {
+            fillTo = Converter.convertColor(levelData.fieldAt(col, row).color) ?: Modifier.BLUE
 
-                try {
-                    sleep(100);
-                    state.playSound(R.raw.fill);
+            try {
+                sleep(100)
+                state.playSound(R.raw.fill)
 
-                    doFill(col, row);
+                doFill(col, row)
 
-                    sleep(100);
+                sleep(100)
 
-                    doFill(col + 1, row);
-                    doFill(col, row + 1);
-                    doFill(col - 1, row);
-                    doFill(col, row - 1);
+                doFill(col + 1, row)
+                doFill(col, row + 1)
+                doFill(col - 1, row)
+                doFill(col, row - 1)
 
-                    sleep(100);
+                sleep(100)
 
-                    doFill(col + 1, row - 1);
-                    doFill(col + 1, row + 1);
-                    doFill(col - 1, row - 1);
-                    doFill(col - 1, row + 1);
+                doFill(col + 1, row - 1)
+                doFill(col + 1, row + 1)
+                doFill(col - 1, row - 1)
+                doFill(col - 1, row + 1)
 
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                runOnFinished();
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
             }
-        }.start();
+
+            runOnFinished()
+        }
     }
 
-    private void doFill(int col, int row) {
-        if (row >= 0 && col >= 0 && row < levelData.getHeight() && col < levelData.getWidth()) {
-            Field f = levelData.fieldAt(col, row);
-            if (f.getModifier() != Modifier.TRANSPARENT) {
-                f.setModifier(fillTo);
+    private fun doFill(col: Int, row: Int) {
+        if (row >= 0 && col >= 0 && row < levelData.height && col < levelData.width) {
+            val f = levelData.fieldAt(col, row)
+            if (f.modifier != Modifier.TRANSPARENT) {
+                f.modifier = fillTo
             }
         }
     }

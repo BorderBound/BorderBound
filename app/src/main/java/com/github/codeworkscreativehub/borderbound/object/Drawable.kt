@@ -1,79 +1,45 @@
-package com.github.codeworkscreativehub.borderbound.object;
+package com.github.codeworkscreativehub.borderbound.`object`
 
-import com.github.codeworkscreativehub.borderbound.animation.Animation;
+import com.github.codeworkscreativehub.borderbound.animation.Animation
+import java.util.concurrent.ConcurrentLinkedQueue
+import javax.microedition.khronos.opengles.GL10
 
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentLinkedQueue;
+abstract class Drawable {
+    var x: Float = 0f
+    var y: Float = 0f
+    var scale: Float = 1f
+    var isVisible: Boolean = true
 
-import javax.microedition.khronos.opengles.GL10;
+    private val animations = ConcurrentLinkedQueue<Animation>()
 
-public abstract class Drawable {
-    private float x = 0;
-    private float y  = 0;
-    private float scale = 1;
-    private boolean visible = true;
-    private final ConcurrentLinkedQueue<Animation> animations = new ConcurrentLinkedQueue<>();
-
-    public void addAnimation(Animation anim) {
+    fun addAnimation(anim: Animation) {
         if (!animations.contains(anim)) {
-            synchronized (animations) {
-                animations.add(anim);
+            synchronized(animations) {
+                animations.add(anim)
             }
         }
     }
 
-    void processAnimations() {
-        synchronized (animations) {
-            Iterator<Animation> i = animations.iterator();
+    internal fun processAnimations() {
+        synchronized(animations) {
+            val i = animations.iterator()
             while (i.hasNext()) {
-                Animation anim = i.next();
+                val anim = i.next()
 
-                if (anim.shouldBeDeleted()) {
-                    i.remove();
+                if (anim.shouldBeDeleted) {
+                    i.remove()
                 } else {
-                    anim.tick();
+                    anim.tick()
                 }
             }
         }
     }
 
-    public void cancelAnimations() {
-        synchronized (animations) {
-            animations.clear();
+    fun cancelAnimations() {
+        synchronized(animations) {
+            animations.clear()
         }
     }
 
-    public abstract void draw(GL10 gl);
-
-    public final float getX() {
-        return x;
-    }
-
-    public final void setX(float x) {
-        this.x = x;
-    }
-
-    public final float getY() {
-        return y;
-    }
-
-    public final void setY(float y) {
-        this.y = y;
-    }
-
-    public final float getScale() {
-        return scale;
-    }
-
-    public final void setScale(float scale) {
-        this.scale = scale;
-    }
-
-    public final boolean isVisible() {
-        return visible;
-    }
-
-    public final void setVisible(boolean visible) {
-        this.visible = visible;
-    }
+    abstract fun draw(gl: GL10)
 }

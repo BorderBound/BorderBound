@@ -1,133 +1,126 @@
-package com.github.codeworkscreativehub.borderbound.state;
+package com.github.codeworkscreativehub.borderbound.state
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.view.MotionEvent;
+import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
+import android.view.MotionEvent
+import com.github.codeworkscreativehub.borderbound.BuildConfig
+import com.github.codeworkscreativehub.borderbound.GLRenderer
+import com.github.codeworkscreativehub.borderbound.SoundPool
+import com.github.codeworkscreativehub.borderbound.model.Level
+import com.github.codeworkscreativehub.borderbound.model.LevelPack
 
-import com.github.codeworkscreativehub.borderbound.BuildConfig;
-import com.github.codeworkscreativehub.borderbound.GLRenderer;
-import com.github.codeworkscreativehub.borderbound.SoundPool;
-import com.github.codeworkscreativehub.borderbound.model.Level;
-import com.github.codeworkscreativehub.borderbound.model.LevelPack;
+abstract class State {
 
-abstract public class State {
-    static final int STEPS_NOT_SOLVED = 999;
-    private static final int UNLOCK_NEXT_LEVELS;
+    private var screenWidth: Float = 0f
+    private var screenHeight: Float = 0f
+    private var soundPool: SoundPool? = null
+    private var activity: Activity? = null
+    private lateinit var playedPrefs: SharedPreferences
+    private lateinit var prefs: SharedPreferences
 
-    static {
-        if (BuildConfig.DEBUG_LEVELS) {
-            UNLOCK_NEXT_LEVELS = 500;
-        } else {
-            UNLOCK_NEXT_LEVELS = 5;
+    abstract fun entry()
+
+    abstract fun exit()
+
+    abstract fun next(): State
+
+    abstract fun onBackPressed()
+
+    abstract fun onTouchEvent(event: MotionEvent)
+
+    protected abstract fun initialize(renderer: GLRenderer)
+
+    fun initialize(renderer: GLRenderer, soundPool: SoundPool, activity: Activity) {
+        this.screenWidth = renderer.getWidth()
+        this.screenHeight = renderer.getHeight()
+        this.soundPool = soundPool
+        this.activity = activity
+        this.playedPrefs = activity.getSharedPreferences("playedState", Context.MODE_PRIVATE)
+        this.prefs = activity.getSharedPreferences("preferences", Context.MODE_PRIVATE)
+
+        renderer.setColorscheme(preferences.getInt("colorschemeIndex", 0))
+        initialize(renderer)
+    }
+
+    internal fun makePlayed(level: Int) {
+        playedPrefs.edit().putBoolean("l$level", true).apply()
+    }
+
+    internal fun makeUnPlayed(level: Int) {
+        playedPrefs.edit().putBoolean("l$level", false).apply()
+    }
+
+    internal fun saveSteps(level: Int, steps: Int) {
+        if (playedPrefs.getInt("s$level", STEPS_NOT_SOLVED) > steps) {
+            playedPrefs.edit().putInt("s$level", steps).apply()
         }
     }
 
-    private float screenWidth;
-    private float screenHeight;
-    private SoundPool soundPool;
-    private Activity activity;
-    private SharedPreferences playedPrefs;
-    private SharedPreferences prefs;
-
-    abstract public void entry();
-
-    abstract public void exit();
-
-    abstract public State next();
-
-    abstract public void onBackPressed();
-
-    abstract public void onTouchEvent(MotionEvent event);
-
-    abstract protected void initialize(GLRenderer renderer);
-
-    public void initialize(GLRenderer renderer, SoundPool soundPool, Activity activity) {
-        this.screenWidth = renderer.getWidth();
-        this.screenHeight = renderer.getHeight();
-        this.soundPool = soundPool;
-        this.activity = activity;
-        this.playedPrefs = activity.getSharedPreferences("playedState", Context.MODE_PRIVATE);
-        this.prefs = activity.getSharedPreferences("preferences", Context.MODE_PRIVATE);
-
-        renderer.setColorscheme(getPreferences().getInt("colorschemeIndex", 0));
-        initialize(renderer);
+    fun loadSteps(level: Int): Int {
+        return playedPrefs.getInt("s$level", STEPS_NOT_SOLVED)
     }
 
-    void makePlayed(int level) {
-        playedPrefs.edit().putBoolean("l" + level, true).apply();
+    fun isSolved(level: Int): Boolean {
+        return playedPrefs.getBoolean("l$level", false)
     }
 
-    void makeUnPlayed(int level) {
-        playedPrefs.edit().putBoolean("l" + level, false).apply();
-    }
+    val preferences: SharedPreferences
+        get() = prefs
 
-    void saveSteps(int level, int steps) {
-        if (playedPrefs.getInt("s" + level, STEPS_NOT_SOLVED) > steps) {
-            playedPrefs.edit().putInt("s" + level, steps).apply();
-        }
-    }
-
-    public int loadSteps(int level) {
-        return playedPrefs.getInt("s" + level, STEPS_NOT_SOLVED);
-    }
-
-    public boolean isSolved(int level) {
-        return playedPrefs.getBoolean("l" + level, false);
-    }
-
-    SharedPreferences getPreferences() {
-        return prefs;
-    }
-
-    public boolean isPlayable(Level level) {
-        Level current = level;
+    fun isPlayable(level: Level): Boolean {
+        var current = level
 
         // Debug override: unlock everything
         if (BuildConfig.DEBUG_LEVELS) {
-            return true;
+            return true
         }
 
-        for (int i = 0; i <= UNLOCK_NEXT_LEVELS; i++) {
+        for (i in 0..UNLOCK_NEXT_LEVELS) {
 
             // First level in pack
-            if (current.getIndexInPack() == 0) {
-                return isFirstLevelPlayable(current.getPack());
+            if (current.indexInPack == 0) {
+                return isFirstLevelPlayable(current.pack)
             }
 
             // Any solved previous level unlocks this one
-            if (isSolved(current.getNumber())) {
-                return true;
+            if (isSolved(current.number)) {
+                return true
             }
 
             // Move to previous level
-            current = current.getPack().getLevel(current.getIndexInPack() - 1);
+            current = current.pack.getLevel(current.indexInPack - 1)
         }
 
-        return false;
+        return false
     }
 
-    private boolean isFirstLevelPlayable(LevelPack pack) {
+    private fun isFirstLevelPlayable(pack: LevelPack): Boolean {
         return pack.isEasy()
-                || (pack.isMedium() && isSolved(LevelPack.EASY.getFirstLevel().getNumber()))
-                || ((pack.isHard() || pack.isCommunity()) && isSolved(LevelPack.MEDIUM.getFirstLevel().getNumber()));
-    }
-    
-    public float getScreenWidth() {
-        return screenWidth;
+                || (pack.isMedium() && isSolved(LevelPack.EASY.firstLevel!!.number))
+                || ((pack.isHard() || pack.isCommunity()) && isSolved(LevelPack.MEDIUM.firstLevel!!.number))
     }
 
-    public float getScreenHeight() {
-        return screenHeight;
+    fun getScreenWidth(): Float {
+        return screenWidth
     }
 
-    public void playSound(int resId) {
-        if (getPreferences().getBoolean("volumeOn", true)) {
-            soundPool.playSound(resId);
+    fun getScreenHeight(): Float {
+        return screenHeight
+    }
+
+    fun playSound(resId: Int) {
+        if (preferences.getBoolean("volumeOn", true)) {
+            soundPool?.playSound(resId)
         }
     }
 
-    Activity getActivity() {
-        return activity;
+    fun getActivity(): Activity? {
+        return activity
+    }
+
+    companion object {
+        const val STEPS_NOT_SOLVED = 999
+        private val UNLOCK_NEXT_LEVELS = if (BuildConfig.DEBUG_LEVELS) 500 else 5
     }
 }

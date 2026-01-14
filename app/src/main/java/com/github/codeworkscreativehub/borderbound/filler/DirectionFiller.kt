@@ -1,65 +1,58 @@
-package com.github.codeworkscreativehub.borderbound.filler;
+package com.github.codeworkscreativehub.borderbound.filler
 
-import com.github.codeworkscreativehub.borderbound.Converter;
-import com.github.codeworkscreativehub.borderbound.R;
-import com.github.codeworkscreativehub.borderbound.model.Field;
-import com.github.codeworkscreativehub.borderbound.model.Level;
-import com.github.codeworkscreativehub.borderbound.model.Modifier;
-import com.github.codeworkscreativehub.borderbound.state.State;
+import com.github.codeworkscreativehub.borderbound.Converter
+import com.github.codeworkscreativehub.borderbound.R
+import com.github.codeworkscreativehub.borderbound.model.Level
+import com.github.codeworkscreativehub.borderbound.model.Modifier
+import com.github.codeworkscreativehub.borderbound.state.State
+import kotlin.concurrent.thread
 
-public class DirectionFiller extends Filler {
-    private boolean somethingWasFilled = false;
-    private Modifier fillFrom = Modifier.EMPTY;
-    private Modifier fillTo = Modifier.BLUE;
-    private final Level levelData;
-    private final State state;
-    private final int dx;
-    private final int dy;
-    private final int col, row;
+class DirectionFiller(
+    private val levelData: Level,
+    private val col: Int,
+    private val row: Int,
+    private val dx: Int,
+    private val dy: Int,
+    private val state: State
+) : Filler() {
 
-    DirectionFiller(Level levelData, int col, int row, int dx, int dy, State state) {
-        this.levelData = levelData;
-        this.state = state;
-        this.col = col;
-        this.row = row;
-        this.dx = dx;
-        this.dy = dy;
-    }
+    private var somethingWasFilled = false
+    private var fillFrom = Modifier.EMPTY
+    private var fillTo = Modifier.BLUE
 
-    public void fill() {
-        new Thread() {
-            public void run() {
-                somethingWasFilled = false;
+    override fun fill() {
+        thread {
+            somethingWasFilled = false
 
-                fillFrom = Modifier.EMPTY;
-                fillTo = Converter.convertColor(levelData.fieldAt(col, row).getColor());
+            fillFrom = Modifier.EMPTY
+            fillTo = Converter.convertColor(levelData.fieldAt(col, row).color) ?: Modifier.BLUE
 
-                doFill(col, row);
-                if (!somethingWasFilled) {
-                    fillFrom = Converter.convertColor(levelData.fieldAt(col, row).getColor());
-                    fillTo = Modifier.EMPTY;
-                    doFill(col, row);
-                }
-
-                runOnFinished();
+            doFill(col, row)
+            if (!somethingWasFilled) {
+                fillFrom = Converter.convertColor(levelData.fieldAt(col, row).color) ?: Modifier.BLUE
+                fillTo = Modifier.EMPTY
+                doFill(col, row)
             }
-        }.start();
+
+            runOnFinished()
+        }
     }
 
-    private void doFill(int col, int row) {
-        int x = col + dx;
-        int y = row + dy;
+    private fun doFill(col: Int, row: Int) {
+        var x = col + dx
+        var y = row + dy
 
-        while (y >= 0 && x >= 0 && y < levelData.getHeight() && x < levelData.getWidth()
-                && levelData.fieldAt(x, y).getModifier() == fillFrom) {
-            Field f = levelData.fieldAt(x, y);
-            somethingWasFilled = true;
-            f.setModifier(fillTo);
-            state.playSound(R.raw.fill);
-            sleep(40);
+        while (y >= 0 && x >= 0 && y < levelData.height && x < levelData.width
+            && levelData.fieldAt(x, y).modifier == fillFrom
+        ) {
+            val f = levelData.fieldAt(x, y)
+            somethingWasFilled = true
+            f.modifier = fillTo
+            state.playSound(R.raw.fill)
+            sleep(40)
 
-            x += dx;
-            y += dy;
+            x += dx
+            y += dy
         }
     }
 }

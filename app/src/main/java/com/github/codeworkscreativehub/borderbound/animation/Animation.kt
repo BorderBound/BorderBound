@@ -1,68 +1,59 @@
-package com.github.codeworkscreativehub.borderbound.animation;
+package com.github.codeworkscreativehub.borderbound.animation
 
-import com.github.codeworkscreativehub.borderbound.object.Drawable;
+import com.github.codeworkscreativehub.borderbound.`object`.Drawable
 
-public abstract class Animation {
-    public static final int DURATION_LONG = 400;
-    public static final int DURATION_SHORT = 200;
+abstract class Animation(
+    val subject: Drawable,
+    val delay: Int
+) {
+    var isRunning: Boolean = false
+        private set
+    var shouldBeDeleted: Boolean = false
+        private set
+    private var timeStarted: Long = 0
 
-    private final Drawable subject;
-    private final int delay;
-    private boolean isRunning = false;
-    private boolean shouldBeDeleted = false;
-    private long timeStarted;
-
-    Animation(Drawable subject, int delay) {
-        this.subject = subject;
-        this.delay = delay;
-        subject.addAnimation(this);
+    init {
+        subject.addAnimation(this)
     }
 
-    final Drawable getSubject() {
-        return subject;
+    private fun timeSinceStarted(): Long {
+        return System.currentTimeMillis() - timeStarted
     }
 
-    final int getDelay() {
-        return delay;
+    open fun start() {
+        isRunning = true
+        timeStarted = System.currentTimeMillis()
+        this.shouldBeDeleted = false
     }
 
-    private long timeSinceStarted() {
-        return System.currentTimeMillis() - timeStarted;
+    fun pause() {
+        isRunning = false
     }
 
-    public void start() {
-        isRunning = true;
-        timeStarted = System.currentTimeMillis();
-        this.shouldBeDeleted = false;
+    fun destroy() {
+        isRunning = false
+        this.shouldBeDeleted = true
     }
 
-    public final void pause() {
-        isRunning = false;
+    internal open fun restart() {
+        isRunning = true
+        timeStarted = System.currentTimeMillis()
     }
 
-    void destroy() {
-        isRunning = false;
-        this.shouldBeDeleted = true;
-    }
+    internal abstract fun tick(durationRunning: Long)
 
-    void restart() {
-        isRunning = true;
-        timeStarted = System.currentTimeMillis();
-    }
-
-    abstract void tick(long durationRunning);
-
-    public final void tick() {
+    fun tick() {
         if (!isRunning) {
-            return;
+            return
         }
 
         if (timeSinceStarted() > delay) {
-            tick(timeSinceStarted() - delay);
+            tick(timeSinceStarted() - delay)
         }
     }
 
-    public boolean shouldBeDeleted() {
-        return shouldBeDeleted;
+    companion object {
+        const val DURATION_LONG = 400
+        const val DURATION_SHORT = 200
     }
 }

@@ -1,53 +1,46 @@
-package com.github.codeworkscreativehub.borderbound;
+package com.github.codeworkscreativehub.borderbound
 
-import android.app.Activity;
-import android.content.Context;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
-import android.os.Build;
-import android.util.SparseIntArray;
+import android.app.Activity
+import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.SoundPool
+import android.util.SparseIntArray
 
-public class SoundPool {
-	private final android.media.SoundPool pool;
-	private final SparseIntArray items = new SparseIntArray();
-	private final Context myContext;
-	
-	SoundPool(Activity a) {
-		a.setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		myContext = a;
+class SoundPool internal constructor(a: Activity) {
+    private val pool: SoundPool
+    private val items = SparseIntArray()
+    private val myContext: Context
 
-		if (Build.VERSION.SDK_INT < 21) {
-			//noinspection deprecation
-			pool = new android.media.SoundPool(10, AudioManager.STREAM_MUSIC, 0);
-		} else {
-			android.media.SoundPool.Builder builder = new android.media.SoundPool.Builder();
-			builder.setAudioAttributes(new AudioAttributes.Builder()
-					.setUsage(AudioAttributes.USAGE_GAME)
-					.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-					.build());
-			builder.setMaxStreams(3);
-			pool = builder.build();
-		}
+    init {
+        a.volumeControlStream = AudioManager.STREAM_MUSIC
+        myContext = a
 
-        pool.setOnLoadCompleteListener(new android.media.SoundPool.OnLoadCompleteListener() {
-            @Override
-			public void onLoadComplete(android.media.SoundPool soundPool, int sampleId, int status) {
-			}
-        });
-        
-	}
-	void loadSound(int ResID){
-		items.put(ResID, pool.load(myContext, ResID, 1));
-	}
+        val builder = SoundPool.Builder()
+        builder.setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+        )
+        builder.setMaxStreams(3)
+        pool = builder.build()
 
-	public void playSound(int ResID){
-		AudioManager audioManager = (AudioManager) myContext.getSystemService(Context.AUDIO_SERVICE);
-        float actualVolume = (float) audioManager
-                .getStreamVolume(AudioManager.STREAM_MUSIC);
-        float maxVolume = (float) audioManager
-                .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        float volume = actualVolume / maxVolume;
-        
-        pool.play(items.get(ResID), volume, volume, 1, 0, 1f);
-	}
+        pool.setOnLoadCompleteListener { _, _, _ -> }
+    }
+
+    fun loadSound(resID: Int) {
+        items.put(resID, pool.load(myContext, resID, 1))
+    }
+
+    fun playSound(resID: Int) {
+        val audioManager = myContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val actualVolume = audioManager
+            .getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
+        val maxVolume = audioManager
+            .getStreamMaxVolume(AudioManager.STREAM_MUSIC).toFloat()
+        val volume = actualVolume / maxVolume
+
+        pool.play(items.get(resID), volume, volume, 1, 0, 1f)
+    }
 }

@@ -1,5 +1,5 @@
-package com.github.codeworkscreativehub.borderbound.model;
+package com.github.codeworkscreativehub.borderbound.model
 
-public enum Color {
+enum class Color {
     DARK, GREEN, BLUE, ORANGE, RED, EMPTY
 }

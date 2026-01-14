@@ -1,124 +1,123 @@
-package com.github.codeworkscreativehub.borderbound.object;
+package com.github.codeworkscreativehub.borderbound.`object`
 
-import android.view.MotionEvent;
-import com.github.codeworkscreativehub.borderbound.BuildConfig;
-import com.github.codeworkscreativehub.borderbound.model.Level;
-import com.github.codeworkscreativehub.borderbound.model.LevelPack;
-import com.github.codeworkscreativehub.borderbound.state.State;
+import android.view.MotionEvent
+import com.github.codeworkscreativehub.borderbound.BuildConfig
+import com.github.codeworkscreativehub.borderbound.model.Level
+import com.github.codeworkscreativehub.borderbound.model.LevelPack
+import com.github.codeworkscreativehub.borderbound.state.State
+import javax.microedition.khronos.opengles.GL10
 
-import javax.microedition.khronos.opengles.GL10;
+class LevelList(
+    boxSize: Float,
+    private val context: State
+) : Drawable() {
+    private val planeLevel: Plane
+    private val planeLevelDone: Plane
+    private val planeLevelPerfect: Plane
+    private val planeLevelLocked: Plane
+    private val number: Number
+    private val boxHeight: Float = boxSize
+    private val boxWidth: Float = boxSize
+    private var pack: LevelPack? = null
 
-public class LevelList extends Drawable {
-    private final Plane planeLevel;
-    private final Plane planeLevelDone;
-    private final Plane planeLevelPerfect;
-    private final Plane planeLevelLocked;
-    private final Number number;
-    private final float boxHeight;
-    private final float boxWidth;
-    private final State context;
-    private LevelPack pack;
-
-    public LevelList(float boxSize, State context) {
-        boxHeight = boxSize;
-        boxWidth = boxSize;
-        this.context = context;
-
-        TextureCoordinates coordinatesLevel = TextureCoordinates.getFromBlocks(6, 0, 7, 1);
-        TextureCoordinates coordinatesLevelDone = TextureCoordinates.getFromBlocks(7, 0, 8, 1);
-        TextureCoordinates coordinatesLevelPerfect = TextureCoordinates.getFromBlocks(6, 1, 7, 2);
-        TextureCoordinates coordinatesLevelLocked = TextureCoordinates.getFromBlocks(7, 1, 8, 2);
-        planeLevel = new Plane(0, 0, boxSize, boxSize, coordinatesLevel);
-        planeLevelDone = new Plane(0, 0, boxSize, boxSize, coordinatesLevelDone);
-        planeLevelPerfect = new Plane(0, 0, boxSize, boxSize, coordinatesLevelPerfect);
-        planeLevelLocked = new Plane(0, 0, boxSize, boxSize, coordinatesLevelLocked);
-        number = new Number();
-        number.setFontSize(boxSize / 3);
+    init {
+        val coordinatesLevel = TextureCoordinates.getFromBlocks(6, 0, 7, 1)
+        val coordinatesLevelDone = TextureCoordinates.getFromBlocks(7, 0, 8, 1)
+        val coordinatesLevelPerfect = TextureCoordinates.getFromBlocks(6, 1, 7, 2)
+        val coordinatesLevelLocked = TextureCoordinates.getFromBlocks(7, 1, 8, 2)
+        planeLevel = Plane(0f, 0f, boxSize, boxSize, coordinatesLevel)
+        planeLevelDone = Plane(0f, 0f, boxSize, boxSize, coordinatesLevelDone)
+        planeLevelPerfect = Plane(0f, 0f, boxSize, boxSize, coordinatesLevelPerfect)
+        planeLevelLocked = Plane(0f, 0f, boxSize, boxSize, coordinatesLevelLocked)
+        number = Number()
+        number.setFontSize(boxSize / 3)
     }
 
-    public float getHeight() {
-        int num = pack.size();
-        return boxHeight * num/3 * 1.5f + boxHeight;
-    }
+    val height: Float
+        get() {
+            val num = pack?.size() ?: 0
+            return boxHeight * (num / 3) * 1.5f + boxHeight
+        }
 
-    private float getXFor(int num) {
-        if (num % 3 == 0) {
-            return boxWidth / 2;
+    private fun getXFor(num: Int): Float {
+        return if (num % 3 == 0) {
+            boxWidth / 2
         } else if (num % 3 == 1) {
-            return context.getScreenWidth() / 3 + boxWidth / 2;
+            context.getScreenWidth() / 3 + boxWidth / 2
         } else {
-            return (context.getScreenWidth() / 3)*2 + boxWidth / 2;
+            (context.getScreenWidth() / 3) * 2 + boxWidth / 2
         }
     }
 
-    private float getYFor(int num) {
-        return - (num/3) * boxHeight * 1.5f - boxHeight;
+    private fun getYFor(num: Int): Float {
+        return -(num / 3) * boxHeight * 1.5f - boxHeight
     }
 
-    private void drawButton(int indexInPack, Level level, GL10 gl) {
-        Plane draw;
-        if (context.isSolved(level.getNumber())) {
-            if (level.getOptimalSteps() != 0 && context.loadSteps(level.getNumber()) <= level.getOptimalSteps()) {
-                draw = planeLevelPerfect;
+    private fun drawButton(indexInPack: Int, level: Level, gl: GL10) {
+        val draw: Plane = if (context.isSolved(level.number)) {
+            if (level.optimalSteps != 0 && context.loadSteps(level.number) <= level.optimalSteps) {
+                planeLevelPerfect
             } else {
-                draw = planeLevelDone;
+                planeLevelDone
             }
         } else if (!context.isPlayable(level)) {
-            draw = planeLevelLocked;
+            planeLevelLocked
         } else {
-            draw = planeLevel;
+            planeLevel
         }
 
-        draw.setX(getXFor(indexInPack));
-        draw.setY(getYFor(indexInPack));
-        draw.draw(gl);
+        draw.x = getXFor(indexInPack)
+        draw.y = getYFor(indexInPack)
+        draw.draw(gl)
 
         if (BuildConfig.DEBUG_LEVELS) {
-            number.setValue(level.getNumber());
+            number.setValue(level.number)
         } else {
-            number.setValue(indexInPack + 1);
+            number.setValue(indexInPack + 1)
         }
-        number.setX(draw.getX() + boxWidth + boxWidth / 4);
-        number.setY(draw.getY() + boxHeight / 3);
-        number.draw(gl);
+        number.x = draw.x + boxWidth + boxWidth / 4
+        number.y = draw.y + boxHeight / 3
+        number.draw(gl)
     }
 
-    @Override
-    public void draw(GL10 gl) {
-        if (!isVisible()) {
-            return;
+    override fun draw(gl: GL10) {
+        if (!isVisible) {
+            return
         }
-        processAnimations();
+        processAnimations()
 
-        gl.glPushMatrix();
-        gl.glTranslatef(getX(), getY(), 0);
-        gl.glScalef(getScale(), getScale(), getScale());
+        gl.glPushMatrix()
+        gl.glTranslatef(x, y, 0f)
+        gl.glScalef(scale, scale, scale)
 
         if (pack != null) {
-            for (int i = 0; i < pack.size(); i++) {
-                drawButton(i, pack.getLevel(i), gl);
+            val p = pack!!
+            for (i in 0 until p.size()) {
+                drawButton(i, p.getLevel(i), gl)
             }
         }
 
-        gl.glPopMatrix();
+        gl.glPopMatrix()
     }
 
-    public void setPack(LevelPack pack) {
-        this.pack = pack;
+    fun setPack(pack: LevelPack) {
+        this.pack = pack
     }
 
-    public boolean collides(MotionEvent event, float height) {
-        return getCollision(event, height) != null;
+    fun collides(event: MotionEvent, height: Float): Boolean {
+        return getCollision(event, height) != null
     }
 
-    public Level getCollision(MotionEvent event, float height) {
-        for (int i = 0; i < pack.size(); i++) {
-            planeLevel.setX(getXFor(i));
-            planeLevel.setY(getYFor(i));
-            if (planeLevel.collides(event.getX(), event.getY() + getY(), height)) {
-                return pack.getLevel(i);
+    fun getCollision(event: MotionEvent, height: Float): Level? {
+        val p = pack ?: return null
+        for (i in 0 until p.size()) {
+            planeLevel.x = getXFor(i)
+            planeLevel.y = getYFor(i)
+            // Use getY() which corresponds to 'y' property of this LevelList (likely translation)
+            if (planeLevel.collides(event.x, event.y + y, height)) { // + y because of scroll offset likely
+                return p.getLevel(i)
             }
         }
-        return null;
+        return null
     }
 }

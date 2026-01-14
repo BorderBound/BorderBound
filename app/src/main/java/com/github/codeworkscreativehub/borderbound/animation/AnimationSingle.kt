@@ -1,41 +1,34 @@
-package com.github.codeworkscreativehub.borderbound.animation;
+package com.github.codeworkscreativehub.borderbound.animation
 
-import com.github.codeworkscreativehub.borderbound.object.Drawable;
+import com.github.codeworkscreativehub.borderbound.`object`.Drawable
 
-abstract class AnimationSingle extends Animation {
-    private final int duration;
-    private boolean hadFirstTick = false;
+abstract class AnimationSingle(
+    subject: Drawable,
+    val duration: Int,
+    startIn: Int
+) : Animation(subject, startIn) {
 
-    AnimationSingle(Drawable subject, int duration, int startIn) {
-        super(subject, startIn);
-        this.duration = duration;
-    }
-    abstract AnimationSingle reverse();
+    private var hadFirstTick = false
 
-    int getDuration() {
-        return duration;
-    }
+    abstract fun reverse(): AnimationSingle
 
-    abstract void tick(double percentage);
-    abstract void finalTick();
+    internal abstract fun tick(percentage: Double)
+    internal abstract fun finalTick()
 
-    void firstTick() {
+    internal open fun firstTick() {
         // To be overridden
     }
 
-    @Override
-    final void tick(long durationRunning) {
+    override fun tick(durationRunning: Long) {
         if (!hadFirstTick) {
-            hadFirstTick = true;
-            firstTick();
+            hadFirstTick = true
+            firstTick()
         }
-        if (durationRunning > getDuration()) {
-            finalTick();
-            this.destroy();
-            return;
+        if (durationRunning > duration) {
+            finalTick()
+            this.destroy()
+            return
         }
-        tick((double) durationRunning / (double) getDuration());
+        tick(durationRunning.toDouble() / duration.toDouble())
     }
-
-
 }

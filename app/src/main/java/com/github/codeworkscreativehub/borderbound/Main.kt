@@ -1,123 +1,129 @@
-package com.github.codeworkscreativehub.borderbound;
+package com.github.codeworkscreativehub.borderbound
 
-import android.app.ActivityManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
-import android.view.MotionEvent;
-import android.view.Window;
-import android.view.WindowManager;
+import android.app.ActivityManager
+import android.os.Build
+import android.os.Bundle
+import android.view.MotionEvent
+import android.view.Window
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import com.github.codeworkscreativehub.borderbound.model.LevelPack
+import com.github.codeworkscreativehub.borderbound.state.ExitState
+import com.github.codeworkscreativehub.borderbound.state.GameState
+import com.github.codeworkscreativehub.borderbound.state.LevelPackSelectState
+import com.github.codeworkscreativehub.borderbound.state.LevelSelectState
+import com.github.codeworkscreativehub.borderbound.state.MainMenuState
+import com.github.codeworkscreativehub.borderbound.state.SettingsState
+import com.github.codeworkscreativehub.borderbound.state.State
+import com.github.codeworkscreativehub.borderbound.state.TutorialState
 
-import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.app.AppCompatActivity;
+class Main : AppCompatActivity() {
+    private var glSurfaceView: MyGLSurfaceView? = null
+    private var soundPool: SoundPool? = null
+    private var currentState: State? = null
 
-import com.github.codeworkscreativehub.borderbound.model.LevelPack;
-import com.github.codeworkscreativehub.borderbound.state.ExitState;
-import com.github.codeworkscreativehub.borderbound.state.GameState;
-import com.github.codeworkscreativehub.borderbound.state.LevelPackSelectState;
-import com.github.codeworkscreativehub.borderbound.state.LevelSelectState;
-import com.github.codeworkscreativehub.borderbound.state.MainMenuState;
-import com.github.codeworkscreativehub.borderbound.state.SettingsState;
-import com.github.codeworkscreativehub.borderbound.state.State;
-import com.github.codeworkscreativehub.borderbound.state.TutorialState;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-public class Main extends AppCompatActivity {
-    private MyGLSurfaceView glSurfaceView;
-    private SoundPool soundPool;
-    private State currentState;
+        // Remove title and set fullscreen
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.main);
+        setContentView(R.layout.main)
 
-        glSurfaceView = findViewById(R.id.gl_surface_view);
+        glSurfaceView = findViewById(R.id.gl_surface_view)
 
-        getSharedPreferences("preferences", Context.MODE_PRIVATE).edit()
-                .putInt("lastAppVersion", BuildConfig.VERSION_CODE)
-                .apply();
-
-        LevelPack.parsePacks(this);
-        createViews();
-
-        ActivityManager.TaskDescription taskDesc = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            taskDesc = new ActivityManager.TaskDescription.Builder()
-                    .setLabel(getString(R.string.app_name))
-                    .setPrimaryColor(0xff206dbc)
-                    .build();
+        // Update last app version in preferences
+        getSharedPreferences("preferences", MODE_PRIVATE).edit().apply {
+            putInt("lastAppVersion", BuildConfig.VERSION_CODE)
+            apply()
         }
-        setTaskDescription(taskDesc);
 
-        // Modern back gesture + hardware back handling
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (currentState != null) {
-                    currentState.onBackPressed();
-                    switchState();
+        LevelPack.parsePacks(this)
+        createViews()
+
+        // Handle modern TaskDescription for Recents screen
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val taskDesc = ActivityManager.TaskDescription.Builder()
+                .setLabel(getString(R.string.app_name))
+                .setPrimaryColor(0xff206dbc.toInt())
+                .build()
+            setTaskDescription(taskDesc)
+        }
+
+        // Handle Back Press
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                currentState?.let {
+                    it.onBackPressed()
+                    switchState()
                 }
             }
-        });
+        })
     }
 
-    private void createViews() {
-        glSurfaceView.getRenderer().setOnViewportSetupComplete(() -> {
-            soundPool = new SoundPool(Main.this);
-            soundPool.loadSound(R.raw.click);
-            soundPool.loadSound(R.raw.fill);
-            soundPool.loadSound(R.raw.won);
-
-            State[] states = new State[]{
-                    MainMenuState.getInstance(),
-                    ExitState.getInstance(),
-                    SettingsState.getInstance(),
-                    LevelPackSelectState.getInstance(),
-                    LevelSelectState.getInstance(),
-                    GameState.getInstance(),
-                    TutorialState.getInstance()
-            };
-
-            for (State state : states) {
-                state.initialize(glSurfaceView.getRenderer(), soundPool, Main.this);
+    private fun createViews() {
+        // Set up the renderer callback
+        glSurfaceView?.renderer?.setOnViewportSetupComplete {
+            soundPool = SoundPool(this@Main).apply {
+                loadSound(R.raw.click)
+                loadSound(R.raw.fill)
+                loadSound(R.raw.won)
             }
 
-            currentState = MainMenuState.getInstance();
-            currentState.entry();
-        });
-    }
+            val states = arrayOf(
+                MainMenuState.getInstance(),
+                ExitState.getInstance(),
+                SettingsState.getInstance(),
+                LevelPackSelectState.getInstance(),
+                LevelSelectState.getInstance(),
+                GameState.getInstance(),
+                TutorialState.getInstance()
+            )
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (currentState != null) {
-            event.offsetLocation(-glSurfaceView.getX(), -glSurfaceView.getY());
-            currentState.onTouchEvent(event);
-            switchState();
+            // Initialize all states
+            for (state in states) {
+                state.initialize(glSurfaceView?.renderer!!, soundPool!!, this@Main)
+            }
+
+            // Set initial state
+            currentState = MainMenuState.getInstance()
+            currentState?.entry()
         }
-        return false;
     }
 
-    private void switchState() {
-        State newState = currentState.next();
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        currentState?.let {
+            // Offset the touch coordinates based on surface view position
+            event.offsetLocation(-(glSurfaceView?.x ?: 0f), -(glSurfaceView?.y ?: 0f))
+            it.onTouchEvent(event)
+            switchState()
+        }
+        return false
+    }
+
+    private fun switchState() {
+        val newState = currentState?.next()
         if (currentState != newState) {
-            currentState.exit();
-            currentState = newState;
-            currentState.entry();
+            currentState?.exit()
+            currentState = newState
+            currentState?.entry()
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        glSurfaceView.onResume();
+    override fun onResume() {
+        super.onResume()
+        glSurfaceView?.onResume()
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        glSurfaceView.onPause();
+    override fun onPause() {
+        super.onPause()
+        glSurfaceView?.onPause()
     }
 }

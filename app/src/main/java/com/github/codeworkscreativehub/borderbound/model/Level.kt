@@ -1,83 +1,66 @@
-package com.github.codeworkscreativehub.borderbound.model;
+package com.github.codeworkscreativehub.borderbound.model
 
-public class Level {
-    private Field[][] originalMap;
-    private Field[][] map;
-    private int number;
-    private int indexInPack;
-    private LevelPack pack;
-    private int optimalSteps;
+class Level(
+    val indexInPack: Int,
+    val number: Int,
+    val pack: LevelPack,
+    color: String,
+    modifier: String,
+    val optimalSteps: Int
+) {
+    private val originalMap: Array<Array<Field>>
+    private val map: Array<Array<Field>>
 
-    public Level(int indexInPack, int number, LevelPack pack, String color, String modifier, int optimalSteps) {
-        this.number = number;
-        this.indexInPack = indexInPack;
-        this.pack = pack;
-        this.optimalSteps = optimalSteps;
+    val width: Int
+        get() = map.size
 
-        color = color.replaceAll("\\s", "");
-        modifier = modifier.replaceAll("\\s", "");
-        int width = 5;
-        int height = 6;
+    val height: Int
+        get() = map[0].size
 
-        if (color.length() == 6*8 && modifier.length() == 6*8) {
-            width = 6;
-            height = 8;
+    init {
+        val cleanColor = color.replace(Regex("\\s"), "")
+        val cleanModifier = modifier.replace(Regex("\\s"), "")
+
+        var w = 5
+        var h = 6
+
+        if (cleanColor.length == 6 * 8 && cleanModifier.length == 6 * 8) {
+            w = 6
+            h = 8
         }
 
-        originalMap = new Field[width][height];
-        map = new Field[width][height];
-        for (int col = 0; col < width; col++) {
-            for (int row = 0; row < height; row++) {
-                int index = col + row * width;
-                originalMap[col][row] = new Field(color.charAt(index), modifier.charAt(index));
+        originalMap = Array(w) { col ->
+            Array(h) { row ->
+                val index = col + row * w
+                Field(cleanColor[index], cleanModifier[index])
             }
         }
-        reset();
-    }
 
-    public void reset() {
-        int width = originalMap.length;
-        int height = originalMap[0].length;
-        for (int col = 0; col < width; col++) {
-            for (int row = 0; row < height; row++) {
-                map[col][row] = originalMap[col][row].clone();
-            }
-        }
-    }
-
-    public Field fieldAt(int x, int y) {
-        return map[x][y];
-    }
-
-    public void unvisitAll() {
-        for(int col = 0; col < getWidth(); col++) {
-            for(int row = 0; row < getHeight(); row++) {
-                map[col][row].setVisited(false);
+        // Initialize map with clones of originalMap
+        map = Array(w) { col ->
+            Array(h) { row ->
+                originalMap[col][row].clone()
             }
         }
     }
 
-    public int getWidth() {
-        return map.length;
+    fun reset() {
+        for (col in 0 until width) {
+            for (row in 0 until height) {
+                map[col][row] = originalMap[col][row].clone()
+            }
+        }
     }
 
-    public int getHeight() {
-        return map[0].length;
+    fun fieldAt(x: Int, y: Int): Field {
+        return map[x][y]
     }
 
-    public int getNumber() {
-        return number;
-    }
-
-    public int getIndexInPack() {
-        return indexInPack;
-    }
-
-    public LevelPack getPack() {
-        return pack;
-    }
-
-    public int getOptimalSteps() {
-        return optimalSteps;
+    fun unvisitAll() {
+        for (col in 0 until width) {
+            for (row in 0 until height) {
+                map[col][row].isVisited = false
+            }
+        }
     }
 }

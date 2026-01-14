@@ -1,59 +1,49 @@
-package com.github.codeworkscreativehub.borderbound.state;
+package com.github.codeworkscreativehub.borderbound.state
 
-import android.annotation.SuppressLint;
-import android.os.Handler;
-import android.view.MotionEvent;
+import android.annotation.SuppressLint
+import android.os.Handler
+import android.os.Looper
+import android.view.MotionEvent
+import com.github.codeworkscreativehub.borderbound.GLRenderer
+import com.github.codeworkscreativehub.borderbound.animation.Animation
 
-import com.github.codeworkscreativehub.borderbound.GLRenderer;
-import com.github.codeworkscreativehub.borderbound.animation.Animation;
+class ExitState private constructor() : State() {
 
-public class ExitState extends State {
-    @SuppressLint("StaticFieldLeak")
-    private static ExitState instance;
-
-    private ExitState() {
+    override fun initialize(renderer: GLRenderer) {
 
     }
 
-    public static ExitState getInstance() {
-        if (instance == null) {
-            instance = new ExitState();
-        }
-        return instance;
+    override fun entry() {
+        Handler(Looper.getMainLooper()).postDelayed({
+            getActivity()?.finish()
+        }, Animation.DURATION_LONG.toLong())
     }
 
-    @Override
-    protected void initialize(GLRenderer glRenderer) {
+    override fun exit() {
 
     }
 
-    @Override
-    public void entry() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getActivity().finish();
+    override fun next(): State {
+        return this
+    }
+
+    override fun onBackPressed() {
+
+    }
+
+    override fun onTouchEvent(event: MotionEvent) {
+
+    }
+
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        private var instance: ExitState? = null
+
+        fun getInstance(): ExitState {
+            if (instance == null) {
+                instance = ExitState()
             }
-        }, Animation.DURATION_LONG);
-    }
-
-    @Override
-    public void exit() {
-
-    }
-
-    @Override
-    public State next() {
-        return this;
-    }
-
-    @Override
-    public void onBackPressed() {
-
-    }
-
-    @Override
-    public void onTouchEvent(MotionEvent event) {
-
+            return instance!!
+        }
     }
 }

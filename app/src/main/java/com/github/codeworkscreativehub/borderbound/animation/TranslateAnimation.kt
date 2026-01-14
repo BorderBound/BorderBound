@@ -1,55 +1,52 @@
-package com.github.codeworkscreativehub.borderbound.animation;
+package com.github.codeworkscreativehub.borderbound.animation
 
-import com.github.codeworkscreativehub.borderbound.object.Drawable;
+import com.github.codeworkscreativehub.borderbound.`object`.Drawable
 
-public class TranslateAnimation extends AnimationSingle {
-    private float fromX;
-    private float fromY;
-    private float toX;
-    private float toY;
-    private boolean hideAfter = false;
+class TranslateAnimation(
+    mesh: Drawable,
+    duration: Int,
+    startIn: Int
+) : AnimationSingle(mesh, duration, startIn) {
 
-    public TranslateAnimation(Drawable mesh, int duration, int startIn) {
-        super(mesh, duration, startIn);
+    private var fromX: Float = 0f
+    private var fromY: Float = 0f
+    private var toX: Float = 0f
+    private var toY: Float = 0f
+    private var hideAfter = false
+
+    fun setTo(x: Float, y: Float): TranslateAnimation {
+        this.toX = x
+        this.toY = y
+        return this
     }
 
-    public TranslateAnimation setTo(float x, float y) {
-        this.toX = x;
-        this.toY = y;
-        return this;
+    fun setHideAfter(hideAfter: Boolean): TranslateAnimation {
+        this.hideAfter = hideAfter
+        return this
     }
 
-    public TranslateAnimation setHideAfter(boolean hideAfter) {
-        this.hideAfter = hideAfter;
-        return this;
+    override fun tick(percentage: Double) {
+        subject.x = (fromX + (toX - fromX) * percentage).toFloat()
+        subject.y = (fromY + (toY - fromY) * percentage).toFloat()
     }
 
-    @Override
-    void tick(double percentage) {
-        getSubject().setX((float) (fromX + (toX - fromX) * percentage));
-        getSubject().setY((float) (fromY + (toY - fromY) * percentage));
+    override fun firstTick() {
+        this.fromX = subject.x
+        this.fromY = subject.y
     }
 
-    @Override
-    void firstTick() {
-        this.fromX = getSubject().getX();
-        this.fromY = getSubject().getY();
-    }
-
-    @Override
-    void finalTick() {
-        getSubject().setX(toX);
-        getSubject().setY(toY);
+    override fun finalTick() {
+        subject.x = toX
+        subject.y = toY
 
         if (hideAfter) {
-            getSubject().setVisible(false);
+            subject.isVisible = false
         }
     }
 
-    @Override
-    TranslateAnimation reverse() {
-        TranslateAnimation reversed = new TranslateAnimation(getSubject(), getDuration(), getDelay());
-        reversed.setTo(fromX, fromY);
-        return reversed;
+    override fun reverse(): TranslateAnimation {
+        val reversed = TranslateAnimation(subject, duration, delay)
+        reversed.setTo(fromX, fromY)
+        return reversed
     }
 }

@@ -1,59 +1,51 @@
-package com.github.codeworkscreativehub.borderbound.filler;
+package com.github.codeworkscreativehub.borderbound.filler
 
-import com.github.codeworkscreativehub.borderbound.model.Level;
-import com.github.codeworkscreativehub.borderbound.state.State;
+import com.github.codeworkscreativehub.borderbound.model.Level
+import com.github.codeworkscreativehub.borderbound.model.Modifier
+import com.github.codeworkscreativehub.borderbound.state.State
 
-public abstract class Filler {
-    private Runnable onFinished = null;
-    private long lastAction = 0;
+abstract class Filler {
+    private var onFinished: Runnable? = null
+    private var lastAction: Long = 0
 
-    public abstract void fill();
+    abstract fun fill()
 
-    void runOnFinished() {
-        onFinished.run();
+    fun runOnFinished() {
+        onFinished?.run()
     }
 
-    public static Filler get(Level levelData, int col, int row, State state) {
-        switch (levelData.fieldAt(col, row).getModifier()) {
-            case FLOOD:
-                return new FloodFiller(levelData, col, row, state);
-            case BOMB:
-                return new BombFiller(levelData, col, row, state);
-            case UP: // Fall-through
-            case ROTATE_UP:
-                return new DirectionFiller(levelData, col, row, 0, -1, state);
-            case RIGHT: // Fall-through
-            case ROTATE_RIGHT:
-                return new DirectionFiller(levelData, col, row, 1, 0, state);
-            case LEFT: // Fall-through
-            case ROTATE_LEFT:
-                return new DirectionFiller(levelData, col, row, -1, 0, state);
-            case DOWN: // Fall-through
-            case ROTATE_DOWN:
-                return new DirectionFiller(levelData, col, row, 0, 1, state);
-            default:
-                return null;
+    protected fun sleep(milliseconds: Long) {
+        val timePassed = System.currentTimeMillis() - lastAction
+        var timeLeft = milliseconds - timePassed
+        if (lastAction == 0L) {
+            timeLeft = milliseconds
         }
-    }
-
-    protected void sleep(long milliseconds) {
-        long timePassed = System.currentTimeMillis() - lastAction;
-        long timeLeft = milliseconds - timePassed;
-        if (lastAction == 0) {
-            timeLeft = milliseconds;
-        }
-        lastAction = System.currentTimeMillis();
+        lastAction = System.currentTimeMillis()
         if (timeLeft <= 0) {
-            return;
+            return
         }
         try {
-            Thread.sleep(timeLeft);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.sleep(timeLeft)
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
         }
     }
 
-    public void setOnFinished(Runnable onFinished) {
-        this.onFinished = onFinished;
+    fun setOnFinished(onFinished: Runnable) {
+        this.onFinished = onFinished
+    }
+
+    companion object {
+        fun get(levelData: Level, col: Int, row: Int, state: State): Filler? {
+            return when (levelData.fieldAt(col, row).modifier) {
+                Modifier.FLOOD -> FloodFiller(levelData, col, row, state)
+                Modifier.BOMB -> BombFiller(levelData, col, row, state)
+                Modifier.UP, Modifier.ROTATE_UP -> DirectionFiller(levelData, col, row, 0, -1, state)
+                Modifier.RIGHT, Modifier.ROTATE_RIGHT -> DirectionFiller(levelData, col, row, 1, 0, state)
+                Modifier.LEFT, Modifier.ROTATE_LEFT -> DirectionFiller(levelData, col, row, -1, 0, state)
+                Modifier.DOWN, Modifier.ROTATE_DOWN -> DirectionFiller(levelData, col, row, 0, 1, state)
+                else -> null
+            }
+        }
     }
 }

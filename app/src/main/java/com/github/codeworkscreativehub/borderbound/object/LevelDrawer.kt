@@ -1,156 +1,155 @@
-package com.github.codeworkscreativehub.borderbound.object;
+package com.github.codeworkscreativehub.borderbound.`object`
 
-import android.annotation.SuppressLint;
+import android.annotation.SuppressLint
+import com.github.codeworkscreativehub.borderbound.model.Color
+import com.github.codeworkscreativehub.borderbound.model.Level
+import com.github.codeworkscreativehub.borderbound.model.Modifier
+import javax.microedition.khronos.opengles.GL10
 
-import com.github.codeworkscreativehub.borderbound.model.Color;
-import com.github.codeworkscreativehub.borderbound.model.Field;
-import com.github.codeworkscreativehub.borderbound.model.Level;
-import com.github.codeworkscreativehub.borderbound.model.Modifier;
+class LevelDrawer private constructor() : Drawable() {
 
-import javax.microedition.khronos.opengles.GL10;
+    private var level: Level? = null
+    private lateinit var colors: Array<Plane>
+    private lateinit var modifiers: Array<Plane>
+    var boxSize: Float = 50f
+        private set
+    private var screenWidth: Float = 0f
 
-public class LevelDrawer extends Drawable {
-    @SuppressLint("StaticFieldLeak")
-    private static LevelDrawer instance;
-
-    private Level level;
-    private Plane[] colors;
-    private Plane[] modifiers;
-    private float boxSize = 50f;
-    private float screenWidth = 0;
-
-    public static LevelDrawer getInstance() {
-        if (instance == null) {
-            instance = new LevelDrawer();
-            instance.initialize();
-        }
-        return instance;
+    init {
+        initialize()
     }
 
-    private void initialize() {
-        colors = new Plane[6];
-        colors[0] = ObjectFactory.createSingleBox(8, 0, 1);
-        colors[1] = ObjectFactory.createSingleBox(10, 0, 1);
-        colors[2] = ObjectFactory.createSingleBox(12, 0, 1);
-        colors[3] = ObjectFactory.createSingleBox(14, 0, 1);
-        colors[4] = ObjectFactory.createSingleBox(8, 1, 1);
-        colors[5] = ObjectFactory.createSingleBox(15, 15, 1);
+    private fun initialize() {
+        colors = arrayOf(
+            ObjectFactory.createSingleBox(8, 0, 1f),
+            ObjectFactory.createSingleBox(10, 0, 1f),
+            ObjectFactory.createSingleBox(12, 0, 1f),
+            ObjectFactory.createSingleBox(14, 0, 1f),
+            ObjectFactory.createSingleBox(8, 1, 1f),
+            ObjectFactory.createSingleBox(15, 15, 1f)
+        )
 
-        modifiers = new Plane[17];
-        modifiers[0] = ObjectFactory.createSingleBox(9, 0, 1);
-        modifiers[1] = ObjectFactory.createSingleBox(11, 0, 1);
-        modifiers[2] = ObjectFactory.createSingleBox(13, 0, 1);
-        modifiers[3] = ObjectFactory.createSingleBox(15, 0, 1);
-        modifiers[4] = ObjectFactory.createSingleBox(9, 1, 1);
-        modifiers[5] = ObjectFactory.createSingleBox(8, 2, 1);
-        modifiers[6] = ObjectFactory.createSingleBox(10, 1, 1);
-        modifiers[7] = ObjectFactory.createSingleBox(15, 15, 1);
-        modifiers[8] = ObjectFactory.createSingleBox(10, 2, 1);
-        modifiers[9] = ObjectFactory.createSingleBox(9, 2, 1);
-        modifiers[10] = ObjectFactory.createSingleBox(11, 2, 1);
-        modifiers[11] = ObjectFactory.createSingleBox(12, 2, 1);
-        modifiers[12] = ObjectFactory.createSingleBox(13, 2, 1);
-        modifiers[13] = ObjectFactory.createSingleBox(10, 3, 1);
-        modifiers[14] = ObjectFactory.createSingleBox(9, 3, 1);
-        modifiers[15] = ObjectFactory.createSingleBox(11, 3, 1);
-        modifiers[16] = ObjectFactory.createSingleBox(12, 3, 1);
+        modifiers = arrayOf(
+            ObjectFactory.createSingleBox(9, 0, 1f),
+            ObjectFactory.createSingleBox(11, 0, 1f),
+            ObjectFactory.createSingleBox(13, 0, 1f),
+            ObjectFactory.createSingleBox(15, 0, 1f),
+            ObjectFactory.createSingleBox(9, 1, 1f),
+            ObjectFactory.createSingleBox(8, 2, 1f),
+            ObjectFactory.createSingleBox(10, 1, 1f),
+            ObjectFactory.createSingleBox(15, 15, 1f),
+            ObjectFactory.createSingleBox(10, 2, 1f),
+            ObjectFactory.createSingleBox(9, 2, 1f),
+            ObjectFactory.createSingleBox(11, 2, 1f),
+            ObjectFactory.createSingleBox(12, 2, 1f),
+            ObjectFactory.createSingleBox(13, 2, 1f),
+            ObjectFactory.createSingleBox(10, 3, 1f),
+            ObjectFactory.createSingleBox(9, 3, 1f),
+            ObjectFactory.createSingleBox(11, 3, 1f),
+            ObjectFactory.createSingleBox(12, 3, 1f)
+        )
     }
 
-    @Override
-    public synchronized void draw(GL10 gl) {
-        if (level == null || !isVisible()) {
-            return;
+    @Synchronized
+    override fun draw(gl: GL10) {
+        if (level == null || !isVisible) {
+            return
         }
 
-        processAnimations();
+        processAnimations()
 
-        gl.glPushMatrix();
-        gl.glScalef(getScale(), getScale(), getScale());
+        gl.glPushMatrix()
+        gl.glScalef(scale, scale, scale)
 
-        float startY = getY() - boxSize;
-        for (int col = 0; col < level.getWidth(); col++) {
-            for (int row = 0; row < level.getHeight(); row++) {
-                Field field = level.fieldAt(col, row);
+        val startY = y - boxSize
+        val currentLevel = level ?: return
+        for (col in 0 until currentLevel.width) {
+            for (row in 0 until currentLevel.height) {
+                val field = currentLevel.fieldAt(col, row)
 
-                Plane color = getColorPlane(field.getColor());
-                color.setX(getX() + (col + 0.5f) * boxSize);
-                color.setY(startY - row * boxSize);
-                color.draw(gl);
+                val color = getColorPlane(field.color)
+                color.x = x + (col + 0.5f) * boxSize
+                color.y = startY - row * boxSize
+                color.draw(gl)
 
-                Plane modifier = getModifierPlane(field.getModifier());
-                modifier.setX(getX() + (col + 0.5f) * boxSize);
-                modifier.setY(startY - row * boxSize);
-                modifier.draw(gl);
+                val modifier = getModifierPlane(field.modifier)
+                modifier.x = x + (col + 0.5f) * boxSize
+                modifier.y = startY - row * boxSize
+                modifier.draw(gl)
             }
         }
 
-        gl.glPopMatrix();
+        gl.glPopMatrix()
     }
 
-    private Plane getModifierPlane(Modifier modifier) {
-        return switch (modifier) {
-            case DARK -> modifiers[0];
-            case GREEN -> modifiers[1];
-            case BLUE -> modifiers[2];
-            case ORANGE -> modifiers[3];
-            case RED -> modifiers[4];
-            case FLOOD -> modifiers[5];
-            case EMPTY -> modifiers[6];
-            case UP -> modifiers[8];
-            case RIGHT -> modifiers[9];
-            case LEFT -> modifiers[10];
-            case DOWN -> modifiers[11];
-            case ROTATE_UP -> modifiers[13];
-            case ROTATE_RIGHT -> modifiers[14];
-            case ROTATE_LEFT -> modifiers[15];
-            case ROTATE_DOWN -> modifiers[16];
-            case BOMB -> modifiers[12];
-            default -> // empty
-                    modifiers[7];
-        };
-    }
-
-    private Plane getColorPlane(Color color) {
-        return switch (color) {
-            case DARK -> colors[0];
-            case GREEN -> colors[1];
-            case BLUE -> colors[2];
-            case ORANGE -> colors[3];
-            case RED -> colors[4];
-            default -> // empty
-                    colors[5];
-        };
-    }
-
-    public synchronized void setLevel(Level level) {
-        this.level = level;
-        recalculateSizes();
-    }
-
-    private void recalculateSizes() {
-        if (level == null) {
-            return;
-        }
-
-        this.boxSize = this.screenWidth / (float) (level.getWidth() + 1);
-        for (Plane color : colors) {
-            color.setScale(boxSize);
-        }
-        for (Plane modifier : modifiers) {
-            modifier.setScale(boxSize);
+    private fun getModifierPlane(modifier: Modifier): Plane {
+        return when (modifier) {
+            Modifier.DARK -> modifiers[0]
+            Modifier.GREEN -> modifiers[1]
+            Modifier.BLUE -> modifiers[2]
+            Modifier.ORANGE -> modifiers[3]
+            Modifier.RED -> modifiers[4]
+            Modifier.FLOOD -> modifiers[5]
+            Modifier.EMPTY -> modifiers[6]
+            Modifier.UP -> modifiers[8]
+            Modifier.RIGHT -> modifiers[9]
+            Modifier.LEFT -> modifiers[10]
+            Modifier.DOWN -> modifiers[11]
+            Modifier.ROTATE_UP -> modifiers[13]
+            Modifier.ROTATE_RIGHT -> modifiers[14]
+            Modifier.ROTATE_LEFT -> modifiers[15]
+            Modifier.ROTATE_DOWN -> modifiers[16]
+            Modifier.BOMB -> modifiers[12]
+            else -> modifiers[7]
         }
     }
 
-    public void setScreenWidth(float screenWidth) {
-        this.screenWidth = screenWidth;
-        recalculateSizes();
+    private fun getColorPlane(color: Color): Plane {
+        return when (color) {
+            Color.DARK -> colors[0]
+            Color.GREEN -> colors[1]
+            Color.BLUE -> colors[2]
+            Color.ORANGE -> colors[3]
+            Color.RED -> colors[4]
+            else -> colors[5]
+        }
     }
 
-    public float getBoxSize() {
-        return boxSize;
+    @Synchronized
+    fun setLevel(level: Level) {
+        this.level = level
+        recalculateSizes()
     }
 
-    public float getHeight() {
-        return level.getHeight() * getBoxSize();
+    private fun recalculateSizes() {
+        val currentLevel = level ?: return
+
+        this.boxSize = this.screenWidth / (currentLevel.width + 1).toFloat()
+        for (color in colors) {
+            color.scale = boxSize
+        }
+        for (modifier in modifiers) {
+            modifier.scale = boxSize
+        }
+    }
+
+    fun setScreenWidth(screenWidth: Float) {
+        this.screenWidth = screenWidth
+        recalculateSizes()
+    }
+
+    val height: Float
+        get() = (level?.height ?: 0) * boxSize
+
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        private var instance: LevelDrawer? = null
+
+        fun getInstance(): LevelDrawer {
+            if (instance == null) {
+                instance = LevelDrawer()
+            }
+            return instance!!
+        }
     }
 }

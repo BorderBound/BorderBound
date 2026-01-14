@@ -1,109 +1,99 @@
-package com.github.codeworkscreativehub.borderbound.filler;
+package com.github.codeworkscreativehub.borderbound.filler
 
-import com.github.codeworkscreativehub.borderbound.Converter;
-import com.github.codeworkscreativehub.borderbound.R;
-import com.github.codeworkscreativehub.borderbound.model.Field;
-import com.github.codeworkscreativehub.borderbound.model.Level;
-import com.github.codeworkscreativehub.borderbound.model.Modifier;
-import com.github.codeworkscreativehub.borderbound.state.State;
+import com.github.codeworkscreativehub.borderbound.Converter
+import com.github.codeworkscreativehub.borderbound.R
+import com.github.codeworkscreativehub.borderbound.model.Field
+import com.github.codeworkscreativehub.borderbound.model.Level
+import com.github.codeworkscreativehub.borderbound.model.Modifier
+import com.github.codeworkscreativehub.borderbound.state.State
+import java.util.ArrayDeque
+import kotlin.concurrent.thread
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Queue;
+class FloodFiller(
+    private val levelData: Level,
+    private val col: Int,
+    private val row: Int,
+    private val state: State
+) : Filler() {
 
-public class FloodFiller extends Filler {
-    private boolean somethingWasFilled = false;
-    private Modifier fillFrom = Modifier.EMPTY;
-    private Modifier fillTo = Modifier.BLUE;
-    private final Level levelData;
-    private final State state;
-    private final int col, row;
+    private var somethingWasFilled = false
+    private var fillFrom = Modifier.EMPTY
+    private var fillTo = Modifier.BLUE
 
-    FloodFiller(Level levelData, int col, int row, State state) {
-        this.levelData = levelData;
-        this.state = state;
-        this.col = col;
-        this.row = row;
-    }
+    override fun fill() {
+        thread {
+            try {
+                somethingWasFilled = false
+                fillFrom = Modifier.EMPTY
+                fillTo = Converter.convertColor(levelData.fieldAt(col, row).color) ?: Modifier.BLUE
+                floodBFS(col, row)
 
-    public void fill() {
-        new Thread() {
-            public void run() {
-                try {
-                    somethingWasFilled = false;
-                    fillFrom = Modifier.EMPTY;
-                    fillTo = Converter.convertColor(levelData.fieldAt(col, row).getColor());
-                    floodBFS(col, row);
-
-                    if (!somethingWasFilled) {
-                        fillFrom = Converter.convertColor(levelData.fieldAt(col, row).getColor());
-                        fillTo = Modifier.EMPTY;
-                        floodBFS(col, row);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (!somethingWasFilled) {
+                    fillFrom = Converter.convertColor(levelData.fieldAt(col, row).color) ?: Modifier.BLUE
+                    fillTo = Modifier.EMPTY
+                    floodBFS(col, row)
                 }
-                runOnFinished();
+            } catch (e: InterruptedException) {
+                e.printStackTrace()
             }
-        }.start();
-    }
-
-    private class BfsNode {
-        final int col, row, distance;
-        BfsNode(int col, int row, int distance) {
-            this.col = col;
-            this.row = row;
-            this.distance = distance;
-        }
-
-        Field getField() {
-            return levelData.fieldAt(col, row);
+            runOnFinished()
         }
     }
 
-    private void floodBFS(final int col, final int row) throws InterruptedException {
-        levelData.unvisitAll();
-        Queue<BfsNode> queue = new ArrayDeque<>();
+    private inner class BfsNode(val col: Int, val row: Int, val distance: Int) {
+        val field: Field
+            get() = levelData.fieldAt(col, row)
+    }
 
-        levelData.fieldAt(col, row).setVisited(true);
-        queue.add(new BfsNode(col, row, 0));
-        int lastDistance = 1;
+    @Throws(InterruptedException::class)
+    private fun floodBFS(col: Int, row: Int) {
+        levelData.unvisitAll()
+        val queue = ArrayDeque<BfsNode>()
 
-        while(!queue.isEmpty()) {
-            BfsNode node = queue.poll();
-            for (BfsNode neighbor : getNeighbors(node)) {
-                if (!neighbor.getField().isVisited()) {
-                    neighbor.getField().setVisited(true);
+        levelData.fieldAt(col, row).isVisited = true
+        queue.add(BfsNode(col, row, 0))
+        var lastDistance = 1
 
-                    if (neighbor.getField().getModifier() == fillFrom) {
+        while (!queue.isEmpty()) {
+            val node = queue.poll()
+            // Java `poll` can return null, but ArrayDeque in Java throws if empty? 
+            // `poll` returns null if empty. Kotlin assumes platform type.
+            // But we check `!queue.isEmpty()` so it's safe.
+            if (node == null) continue
+
+            for (neighbor in getNeighbors(node)) {
+                if (!neighbor.field.isVisited) {
+                    neighbor.field.isVisited = true
+
+                    if (neighbor.field.modifier == fillFrom) {
                         if (lastDistance != neighbor.distance) {
-                            lastDistance = neighbor.distance;
-                            sleep(60);
-                            state.playSound(R.raw.fill);
+                            lastDistance = neighbor.distance
+                            sleep(60)
+                            state.playSound(R.raw.fill)
                         }
-                        neighbor.getField().setModifier(fillTo);
-                        queue.add(neighbor);
-                        somethingWasFilled = true;
+                        neighbor.field.modifier = fillTo
+                        queue.add(neighbor)
+                        somethingWasFilled = true
                     }
                 }
             }
         }
     }
 
-    private ArrayList<BfsNode> getNeighbors(BfsNode node) {
-        ArrayList<BfsNode> neighbors = new ArrayList<>();
+    private fun getNeighbors(node: BfsNode): ArrayList<BfsNode> {
+        val neighbors = ArrayList<BfsNode>()
         if (node.col > 0) {
-            neighbors.add(new BfsNode(node.col - 1, node.row, node.distance+1));
+            neighbors.add(BfsNode(node.col - 1, node.row, node.distance + 1))
         }
-        if (node.col < levelData.getWidth() - 1) {
-            neighbors.add(new BfsNode(node.col + 1, node.row, node.distance+1));
+        if (node.col < levelData.width - 1) {
+            neighbors.add(BfsNode(node.col + 1, node.row, node.distance + 1))
         }
         if (node.row > 0) {
-            neighbors.add(new BfsNode(node.col, node.row - 1, node.distance+1));
+            neighbors.add(BfsNode(node.col, node.row - 1, node.distance + 1))
         }
-        if (node.row < levelData.getHeight() - 1) {
-            neighbors.add(new BfsNode(node.col, node.row + 1, node.distance+1));
+        if (node.row < levelData.height - 1) {
+            neighbors.add(BfsNode(node.col, node.row + 1, node.distance + 1))
         }
-        return neighbors;
+        return neighbors
     }
 }

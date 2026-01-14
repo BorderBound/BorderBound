@@ -1,129 +1,121 @@
-package com.github.codeworkscreativehub.borderbound.state;
+package com.github.codeworkscreativehub.borderbound.state
 
-import android.annotation.SuppressLint;
-import android.view.MotionEvent;
+import android.annotation.SuppressLint
+import android.view.MotionEvent
+import com.github.codeworkscreativehub.borderbound.GLRenderer
+import com.github.codeworkscreativehub.borderbound.R
+import com.github.codeworkscreativehub.borderbound.animation.Animation
+import com.github.codeworkscreativehub.borderbound.animation.AnimationFactory
+import com.github.codeworkscreativehub.borderbound.animation.TranslateAnimation
+import com.github.codeworkscreativehub.borderbound.`object`.Plane
+import com.github.codeworkscreativehub.borderbound.`object`.TextureCoordinates
 
-import com.github.codeworkscreativehub.borderbound.R;
-import com.github.codeworkscreativehub.borderbound.animation.Animation;
-import com.github.codeworkscreativehub.borderbound.animation.AnimationFactory;
-import com.github.codeworkscreativehub.borderbound.animation.TranslateAnimation;
-import com.github.codeworkscreativehub.borderbound.object.Plane;
-import com.github.codeworkscreativehub.borderbound.object.TextureCoordinates;
-import com.github.codeworkscreativehub.borderbound.GLRenderer;
+class MainMenuState private constructor() : State() {
 
-public class MainMenuState extends State {
-    @SuppressLint("StaticFieldLeak")
-    private static MainMenuState instance;
-    private State nextState = this;
+    private var nextState: State = this
+    private lateinit var logo: Plane
+    private lateinit var startButton: Plane
+    private lateinit var settingsButton: Plane
+    private lateinit var exitButton: Plane
 
-    private Plane logo;
-    private Plane startButton;
-    private Plane settingsButton;
-    private Plane exitButton;
+    override fun initialize(renderer: GLRenderer) {
+        val coordinatesLogo = TextureCoordinates.getFromBlocks(0, 0, 6, 2)
+        val logoHeight = renderer.getWidth() / 3
+        logo = Plane(0f, renderer.getHeight(), renderer.getWidth(), logoHeight, coordinatesLogo)
+        renderer.addDrawable(logo)
 
-    private MainMenuState() {
+        val menuEntriesWidth = renderer.getWidth() * 0.75f
+        val menuEntriesHeight = menuEntriesWidth / 6
+        val menuEntriesAvailableSpace = getScreenHeight() - logoHeight
+        val menuEntriesStartY = getScreenHeight() - logoHeight - (menuEntriesAvailableSpace - 4 * menuEntriesHeight) / 2
 
+        val coordinatesStart = TextureCoordinates.getFromBlocks(0, 2, 6, 3)
+        startButton = Plane(-menuEntriesWidth, menuEntriesStartY, menuEntriesWidth, menuEntriesHeight, coordinatesStart)
+        renderer.addDrawable(startButton)
+
+        val coordinatesSettings = TextureCoordinates.getFromBlocks(0, 3, 6, 4)
+        settingsButton = Plane(-menuEntriesWidth, startButton.y - 2 * menuEntriesHeight, menuEntriesWidth, menuEntriesHeight, coordinatesSettings)
+        renderer.addDrawable(settingsButton)
+
+        val coordinatesExit = TextureCoordinates.getFromBlocks(0, 4, 6, 5)
+        exitButton = Plane(-menuEntriesWidth, settingsButton.y - 2 * menuEntriesHeight, menuEntriesWidth, menuEntriesHeight, coordinatesExit)
+        renderer.addDrawable(exitButton)
     }
 
-    public static MainMenuState getInstance() {
-        if (instance == null) {
-            instance = new MainMenuState();
-        }
-        return instance;
+    override fun entry() {
+        nextState = this
+
+        logo.y = getScreenHeight()
+        val logoAnimation = TranslateAnimation(logo, Animation.DURATION_LONG, Animation.DURATION_SHORT)
+        logoAnimation.setTo(0f, getScreenHeight() - logo.height)
+        logoAnimation.start()
+
+        AnimationFactory.startMenuAnimationEnter(startButton, (2.0f * Animation.DURATION_SHORT).toInt())
+        AnimationFactory.startMenuAnimationEnter(settingsButton, (2.5f * Animation.DURATION_SHORT).toInt())
+        AnimationFactory.startMenuAnimationEnter(exitButton, (3.0f * Animation.DURATION_SHORT).toInt())
     }
 
-    @Override
-    protected void initialize(GLRenderer glRenderer) {
-        TextureCoordinates coordinatesLogo = TextureCoordinates.getFromBlocks(0, 0, 6, 2);
-        float logoHeight = glRenderer.getWidth() / 3;
-        logo = new Plane(0, glRenderer.getHeight(), glRenderer.getWidth(), logoHeight, coordinatesLogo);
-        glRenderer.addDrawable(logo);
+    override fun exit() {
+        val logoAnimation = TranslateAnimation(logo, Animation.DURATION_SHORT, 0)
+        logoAnimation.setTo(0f, getScreenHeight())
+        logoAnimation.start()
 
-        float menuEntriesWidth = glRenderer.getWidth() * 0.75f;
-        float menuEntriesHeight = menuEntriesWidth / 6;
-        float menuEntriesAvailableSpace = getScreenHeight() - logoHeight;
-        float menuEntriesStartY = getScreenHeight() - logoHeight - (menuEntriesAvailableSpace - 4 * menuEntriesHeight) / 2;
-
-        TextureCoordinates coordinatesStart = TextureCoordinates.getFromBlocks(0, 2, 6, 3);
-        startButton = new Plane(-menuEntriesWidth, menuEntriesStartY, menuEntriesWidth, menuEntriesHeight, coordinatesStart);
-        glRenderer.addDrawable(startButton);
-
-        TextureCoordinates coordinatesSettings = TextureCoordinates.getFromBlocks(0, 3, 6, 4);
-        settingsButton = new Plane(-menuEntriesWidth, startButton.getY() - 2 * menuEntriesHeight, menuEntriesWidth, menuEntriesHeight, coordinatesSettings);
-        glRenderer.addDrawable(settingsButton);
-
-        TextureCoordinates coordinatesExit = TextureCoordinates.getFromBlocks(0, 4, 6, 5);
-        exitButton = new Plane(-menuEntriesWidth, settingsButton.getY() - 2 * menuEntriesHeight, menuEntriesWidth, menuEntriesHeight, coordinatesExit);
-        glRenderer.addDrawable(exitButton);
-    }
-
-    @Override
-    public void entry() {
-        nextState = this;
-
-        logo.setY(getScreenHeight());
-        TranslateAnimation logoAnimation = new TranslateAnimation(logo, Animation.DURATION_LONG, Animation.DURATION_SHORT);
-        logoAnimation.setTo(0, getScreenHeight() - logo.getHeight());
-        logoAnimation.start();
-
-        AnimationFactory.startMenuAnimationEnter(startButton, (int) (2.0f * Animation.DURATION_SHORT));
-        AnimationFactory.startMenuAnimationEnter(settingsButton, (int) (2.5f * Animation.DURATION_SHORT));
-        AnimationFactory.startMenuAnimationEnter(exitButton, (int) (3.0f * Animation.DURATION_SHORT));
-    }
-
-    @Override
-    public void exit() {
-        TranslateAnimation logoAnimation = new TranslateAnimation(logo, Animation.DURATION_SHORT, 0);
-        logoAnimation.setTo(0, getScreenHeight());
-        logoAnimation.start();
-
-        if (nextState == LevelPackSelectState.getInstance() || nextState == TutorialState.getInstance()) {
-            AnimationFactory.startMenuAnimationOutPressed(startButton);
+        if (nextState === LevelPackSelectState.getInstance() || nextState === TutorialState.getInstance()) {
+            AnimationFactory.startMenuAnimationOutPressed(startButton)
         } else {
-            AnimationFactory.startMenuAnimationOut(startButton);
+            AnimationFactory.startMenuAnimationOut(startButton)
         }
 
-        if (nextState == SettingsState.getInstance()) {
-            AnimationFactory.startMenuAnimationOutPressed(settingsButton);
+        if (nextState === SettingsState.getInstance()) {
+            AnimationFactory.startMenuAnimationOutPressed(settingsButton)
         } else {
-            AnimationFactory.startMenuAnimationOut(settingsButton);
+            AnimationFactory.startMenuAnimationOut(settingsButton)
         }
 
-        if (nextState == ExitState.getInstance()) {
-            AnimationFactory.startMenuAnimationOutPressed(exitButton);
+        if (nextState === ExitState.getInstance()) {
+            AnimationFactory.startMenuAnimationOutPressed(exitButton)
         } else {
-            AnimationFactory.startMenuAnimationOut(exitButton);
+            AnimationFactory.startMenuAnimationOut(exitButton)
         }
     }
 
-    @Override
-    public State next() {
-        return nextState;
+    override fun next(): State {
+        return nextState
     }
 
-    @Override
-    public void onBackPressed() {
-        nextState = ExitState.getInstance();
-        playSound(R.raw.click);
+    override fun onBackPressed() {
+        nextState = ExitState.getInstance()
+        playSound(R.raw.click)
     }
 
-    @Override
-    public void onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+    override fun onTouchEvent(event: MotionEvent) {
+        if (event.action == MotionEvent.ACTION_DOWN) {
             if (startButton.collides(event, getScreenHeight())) {
-                playSound(R.raw.click);
+                playSound(R.raw.click)
                 if (isSolved(0)) {
-                    nextState = LevelPackSelectState.getInstance();
+                    nextState = LevelPackSelectState.getInstance()
                 } else {
-                    nextState = TutorialState.getInstance();
+                    nextState = TutorialState.getInstance()
                 }
             } else if (settingsButton.collides(event, getScreenHeight())) {
-                nextState = SettingsState.getInstance();
-                playSound(R.raw.click);
+                nextState = SettingsState.getInstance()
+                playSound(R.raw.click)
             } else if (exitButton.collides(event, getScreenHeight())) {
-                nextState = ExitState.getInstance();
-                playSound(R.raw.click);
+                nextState = ExitState.getInstance()
+                playSound(R.raw.click)
             }
+        }
+    }
+
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        private var instance: MainMenuState? = null
+
+        fun getInstance(): MainMenuState {
+            if (instance == null) {
+                instance = MainMenuState()
+            }
+            return instance!!
         }
     }
 }

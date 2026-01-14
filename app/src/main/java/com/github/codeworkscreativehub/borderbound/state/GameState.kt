@@ -1,470 +1,471 @@
-package com.github.codeworkscreativehub.borderbound.state;
+package com.github.codeworkscreativehub.borderbound.state
 
-import android.annotation.SuppressLint;
-import android.view.MotionEvent;
+import android.annotation.SuppressLint
+import android.view.MotionEvent
+import com.github.codeworkscreativehub.borderbound.BuildConfig
+import com.github.codeworkscreativehub.borderbound.Converter
+import com.github.codeworkscreativehub.borderbound.GLRenderer
+import com.github.codeworkscreativehub.borderbound.R
+import com.github.codeworkscreativehub.borderbound.animation.Animation
+import com.github.codeworkscreativehub.borderbound.animation.AnimationFactory
+import com.github.codeworkscreativehub.borderbound.animation.ScaleAnimation
+import com.github.codeworkscreativehub.borderbound.animation.TranslateAnimation
+import com.github.codeworkscreativehub.borderbound.filler.Filler
+import com.github.codeworkscreativehub.borderbound.model.Level
+import com.github.codeworkscreativehub.borderbound.`object`.LevelDrawer
+import com.github.codeworkscreativehub.borderbound.`object`.Number
+import com.github.codeworkscreativehub.borderbound.`object`.ObjectFactory
+import com.github.codeworkscreativehub.borderbound.`object`.Plane
+import com.github.codeworkscreativehub.borderbound.`object`.TextureCoordinates
 
-import com.github.codeworkscreativehub.borderbound.BuildConfig;
-import com.github.codeworkscreativehub.borderbound.Converter;
-import com.github.codeworkscreativehub.borderbound.GLRenderer;
-import com.github.codeworkscreativehub.borderbound.R;
-import com.github.codeworkscreativehub.borderbound.animation.Animation;
-import com.github.codeworkscreativehub.borderbound.animation.AnimationFactory;
-import com.github.codeworkscreativehub.borderbound.animation.ScaleAnimation;
-import com.github.codeworkscreativehub.borderbound.animation.TranslateAnimation;
-import com.github.codeworkscreativehub.borderbound.filler.Filler;
-import com.github.codeworkscreativehub.borderbound.model.Field;
-import com.github.codeworkscreativehub.borderbound.model.Level;
-import com.github.codeworkscreativehub.borderbound.model.Modifier;
-import com.github.codeworkscreativehub.borderbound.object.LevelDrawer;
-import com.github.codeworkscreativehub.borderbound.object.Number;
-import com.github.codeworkscreativehub.borderbound.object.ObjectFactory;
-import com.github.codeworkscreativehub.borderbound.object.Plane;
-import com.github.codeworkscreativehub.borderbound.object.TextureCoordinates;
+class GameState private constructor() : State() {
 
-public class GameState extends State {
-    @SuppressLint("StaticFieldLeak")
-    private static GameState instance;
-    private final LevelDrawer levelDrawer = LevelDrawer.getInstance();
-    private State nextState = this;
-    private Level level;
-    private float boardStartY = 0;
-    private Plane winMessage;
-    private Plane lockedMessage;
-    private Plane left;
-    private Plane right;
-    private Plane restart;
-    private Plane stepsLabel;
-    private Plane stepsImproved;
-    private Plane solved;
-    private Plane headerBackground;
-    private Number stepsUsed;
-    private Number stepsBest;
-    private Number stepsOptimal;
+    private val levelDrawer = LevelDrawer.getInstance()
+    private var nextState: State = this
+    private lateinit var level: Level
+    private var boardStartY = 0f
+    private lateinit var winMessage: Plane
+    private lateinit var lockedMessage: Plane
+    private lateinit var left: Plane
+    private lateinit var right: Plane
+    private lateinit var restart: Plane
+    private lateinit var stepsLabel: Plane
+    private lateinit var stepsImproved: Plane
+    private lateinit var solved: Plane
+    private lateinit var headerBackground: Plane
+    private lateinit var stepsUsed: Number
+    private lateinit var stepsBest: Number
+    private lateinit var stepsOptimal: Number
 
     // New fields for level display
-    private Number levelNumber;
+    private lateinit var levelNumber: Number
 
-    private boolean isFilling = false;
-    private boolean won = false;
-    private float topBarHeight;
-    private float topButtonSize;
-    private float topButtonY;
-    private float topBarPadding;
-    private float stepsUsedCurrentYDelta;
-    private float stepsUsedBestYDelta;
-    private float currentLevelYDelta;
-    private float stepsOptimalYDelta;
-    private LastLevelState lastLevelState = LastLevelState.NO_LEVEL;
-    private Filler filler;
+    private var isFilling = false
+    private var won = false
+    private var topBarHeight = 0f
+    private var topButtonSize = 0f
+    private var topButtonY = 0f
+    private var topBarPadding = 0f
+    private var stepsUsedCurrentYDelta = 0f
+    private var stepsUsedBestYDelta = 0f
+    private var currentLevelYDelta = 0f
+    private var stepsOptimalYDelta = 0f
+    private var lastLevelState = LastLevelState.NO_LEVEL
+    private var filler: Filler? = null
 
-    private GameState() {
-    }
-
-    public static GameState getInstance() {
-        if (instance == null) {
-            instance = new GameState();
-        }
-        return instance;
-    }
-
-    @Override
-    protected void initialize(GLRenderer glRenderer) {
-        topBarHeight = glRenderer.getWidth() / (8 * 0.6f + 8 * 0.2f);
-        topButtonSize = 0.6f * topBarHeight;
-        topBarPadding = 0.2f * topBarHeight;
-        topButtonY = glRenderer.getHeight() - topButtonSize - topBarPadding;
-        stepsUsedCurrentYDelta = topButtonSize * 0.8f;
-        stepsUsedBestYDelta = topButtonSize * 0.45f;
-        stepsOptimalYDelta = topButtonSize * 0.1f;
-        currentLevelYDelta = topButtonSize * -0.25f;
+    override fun initialize(renderer: GLRenderer) {
+        topBarHeight = renderer.getWidth() / (8 * 0.6f + 8 * 0.2f)
+        topButtonSize = 0.6f * topBarHeight
+        topBarPadding = 0.2f * topBarHeight
+        topButtonY = renderer.getHeight() - topButtonSize - topBarPadding
+        stepsUsedCurrentYDelta = topButtonSize * 0.8f
+        stepsUsedBestYDelta = topButtonSize * 0.45f
+        stepsOptimalYDelta = topButtonSize * 0.1f
+        currentLevelYDelta = topButtonSize * -0.25f
 
         // Header background
-        TextureCoordinates coordinatesHeader = TextureCoordinates.getFromBlocks(14, 12, 15, 13);
-        headerBackground = new Plane(0, glRenderer.getHeight(), glRenderer.getWidth(), topBarHeight, coordinatesHeader);
-        headerBackground.setVisible(false);
-        glRenderer.addDrawable(headerBackground);
+        val coordinatesHeader = TextureCoordinates.getFromBlocks(14, 12, 15, 13)
+        headerBackground = Plane(0f, renderer.getHeight(), renderer.getWidth(), topBarHeight, coordinatesHeader)
+        headerBackground.isVisible = false
+        renderer.addDrawable(headerBackground)
 
         // Left, Right, Restart buttons
-        left = ObjectFactory.createSingleBox(0, 10, topButtonSize);
-        left.setX(topBarPadding);
-        left.setY(glRenderer.getHeight() + topBarPadding);
-        left.setVisible(false);
-        glRenderer.addDrawable(left);
+        left = ObjectFactory.createSingleBox(0, 10, topButtonSize)
+        left.x = topBarPadding
+        left.y = renderer.getHeight() + topBarPadding
+        left.isVisible = false
+        renderer.addDrawable(left)
 
-        right = ObjectFactory.createSingleBox(1, 10, topButtonSize);
-        right.setX(glRenderer.getWidth() - topBarPadding - topButtonSize);
-        right.setY(glRenderer.getHeight() + topBarPadding);
-        right.setVisible(false);
-        glRenderer.addDrawable(right);
+        right = ObjectFactory.createSingleBox(1, 10, topButtonSize)
+        right.x = renderer.getWidth() - topBarPadding - topButtonSize
+        right.y = renderer.getHeight() + topBarPadding
+        right.isVisible = false
+        renderer.addDrawable(right)
 
-        restart = ObjectFactory.createSingleBox(2, 10, topButtonSize);
-        restart.setX(topButtonSize + 2 * topBarPadding);
-        restart.setY(glRenderer.getHeight() + topBarPadding);
-        restart.setVisible(false);
-        glRenderer.addDrawable(restart);
+        restart = ObjectFactory.createSingleBox(2, 10, topButtonSize)
+        restart.x = topButtonSize + 2 * topBarPadding
+        restart.y = renderer.getHeight() + topBarPadding
+        restart.isVisible = false
+        renderer.addDrawable(restart)
 
         // Steps improved box
-        stepsImproved = ObjectFactory.createSingleBox(4, 10, topBarHeight);
-        stepsImproved.setX(6 * topButtonSize + 4 * topBarPadding);
-        stepsImproved.setY(getScreenHeight() - topBarHeight);
-        stepsImproved.setVisible(false);
-        stepsImproved.setScale(2f);
-        glRenderer.addDrawable(stepsImproved);
+        stepsImproved = ObjectFactory.createSingleBox(4, 10, topBarHeight)
+        stepsImproved.x = 6 * topButtonSize + 4 * topBarPadding
+        stepsImproved.y = getScreenHeight() - topBarHeight
+        stepsImproved.isVisible = false
+        stepsImproved.scale = 2f
+        renderer.addDrawable(stepsImproved)
 
         // Steps numbers
-        stepsUsed = new Number();
-        stepsUsed.setFontSize((topButtonSize * 0.8f) * 0.35f);
-        stepsUsed.setX(5 * topButtonSize + 3 * topBarPadding);
-        stepsUsed.setY(glRenderer.getHeight() + topBarPadding + stepsUsedCurrentYDelta + 0.25f * (topButtonSize * 0.8f));
-        glRenderer.addDrawable(stepsUsed);
+        stepsUsed = Number()
+        stepsUsed.setFontSize((topButtonSize * 0.8f) * 0.35f)
+        stepsUsed.x = 5 * topButtonSize + 3 * topBarPadding
+        stepsUsed.y = renderer.getHeight() + topBarPadding + stepsUsedCurrentYDelta + 0.25f * (topButtonSize * 0.8f)
+        renderer.addDrawable(stepsUsed)
 
-        stepsBest = new Number();
-        stepsBest.setFontSize((topButtonSize * 0.8f) * 0.35f);
-        stepsBest.setX(5 * topButtonSize + 3 * topBarPadding);
-        stepsBest.setY(glRenderer.getHeight() + topBarPadding + stepsUsedBestYDelta + 0.25f * (topButtonSize * 0.8f));
-        glRenderer.addDrawable(stepsBest);
+        stepsBest = Number()
+        stepsBest.setFontSize((topButtonSize * 0.8f) * 0.35f)
+        stepsBest.x = 5 * topButtonSize + 3 * topBarPadding
+        stepsBest.y = renderer.getHeight() + topBarPadding + stepsUsedBestYDelta + 0.25f * (topButtonSize * 0.8f)
+        renderer.addDrawable(stepsBest)
 
-        stepsOptimal = new Number();
-        stepsOptimal.setFontSize((topButtonSize * 0.8f) * 0.35f);
-        stepsOptimal.setX(5 * topButtonSize + 3 * topBarPadding);
-        stepsOptimal.setY(glRenderer.getHeight() + topBarPadding + stepsOptimalYDelta + 0.25f * (topButtonSize * 0.8f));
-        glRenderer.addDrawable(stepsOptimal);
+        stepsOptimal = Number()
+        stepsOptimal.setFontSize((topButtonSize * 0.8f) * 0.35f)
+        stepsOptimal.x = 5 * topButtonSize + 3 * topBarPadding
+        stepsOptimal.y = renderer.getHeight() + topBarPadding + stepsOptimalYDelta + 0.25f * (topButtonSize * 0.8f)
+        renderer.addDrawable(stepsOptimal)
 
         // Level number
-        levelNumber = new Number();
-        levelNumber.setFontSize((topButtonSize * 0.8f) * 0.35f);
-        levelNumber.setX(5 * topButtonSize + 3 * topBarPadding);
-        levelNumber.setY(glRenderer.getHeight() + topBarPadding + currentLevelYDelta + 0.5f * (topButtonSize * 0.8f));
-        glRenderer.addDrawable(levelNumber);
+        levelNumber = Number()
+        levelNumber.setFontSize((topButtonSize * 0.8f) * 0.35f)
+        levelNumber.x = 5 * topButtonSize + 3 * topBarPadding
+        levelNumber.y = renderer.getHeight() + topBarPadding + currentLevelYDelta + 0.5f * (topButtonSize * 0.8f)
+        renderer.addDrawable(levelNumber)
 
         // Steps label
-        TextureCoordinates coordinateSteps = TextureCoordinates.getFromBlocks(12, 10, 15, 12);
-        stepsLabel = new Plane(0, 0, 3 * (topButtonSize * 0.8f), 2 * (topButtonSize * 0.8f), coordinateSteps);
-        stepsLabel.setX(2 * topButtonSize + 4 * topBarPadding);
-        stepsLabel.setY(glRenderer.getHeight() + topBarPadding + 0.2f * (topButtonSize * 0.8f));
-        stepsLabel.setVisible(false);
-        glRenderer.addDrawable(stepsLabel);
+        val coordinateSteps = TextureCoordinates.getFromBlocks(12, 10, 15, 12)
+        stepsLabel = Plane(0f, 0f, 3 * (topButtonSize * 0.8f), 2 * (topButtonSize * 0.8f), coordinateSteps)
+        stepsLabel.x = 2 * topButtonSize + 4 * topBarPadding
+        stepsLabel.y = renderer.getHeight() + topBarPadding + 0.2f * (topButtonSize * 0.8f)
+        stepsLabel.isVisible = false
+        renderer.addDrawable(stepsLabel)
 
         // Solved box
-        solved = ObjectFactory.createSingleBox(3, 10, topButtonSize);
-        solved.setX(6 * topButtonSize + 5 * topBarPadding);
-        solved.setY(glRenderer.getHeight() + topBarPadding);
-        solved.setVisible(false);
-        glRenderer.addDrawable(solved);
+        solved = ObjectFactory.createSingleBox(3, 10, topButtonSize)
+        solved.x = 6 * topButtonSize + 5 * topBarPadding
+        solved.y = renderer.getHeight() + topBarPadding
+        solved.isVisible = false
+        renderer.addDrawable(solved)
 
         // Level drawer
-        levelDrawer.setVisible(false);
-        levelDrawer.setScreenWidth(getScreenWidth());
-        levelDrawer.setX(0);
-        glRenderer.addDrawable(levelDrawer);
+        levelDrawer.isVisible = false
+        levelDrawer.setScreenWidth(getScreenWidth())
+        levelDrawer.x = 0f
+        renderer.addDrawable(levelDrawer)
 
         // Win and locked messages
-        TextureCoordinates coordinatesWin = TextureCoordinates.getFromBlocks(0, 8, 6, 10);
-        winMessage = new Plane(0, glRenderer.getHeight(), glRenderer.getWidth(), glRenderer.getWidth() / 3, coordinatesWin);
-        winMessage.setVisible(false);
-        glRenderer.addDrawable(winMessage);
+        val coordinatesWin = TextureCoordinates.getFromBlocks(0, 8, 6, 10)
+        winMessage = Plane(0f, renderer.getHeight(), renderer.getWidth(), renderer.getWidth() / 3, coordinatesWin)
+        winMessage.isVisible = false
+        renderer.addDrawable(winMessage)
 
-        TextureCoordinates coordinatesLocked = TextureCoordinates.getFromBlocks(0, 13, 6, 15);
-        lockedMessage = new Plane(0, glRenderer.getHeight(), glRenderer.getWidth(), glRenderer.getWidth() / 3, coordinatesLocked);
-        lockedMessage.setVisible(false);
-        lockedMessage.setY(-getScreenWidth() * 0.5f);
-        glRenderer.addDrawable(lockedMessage);
+        val coordinatesLocked = TextureCoordinates.getFromBlocks(0, 13, 6, 15)
+        lockedMessage = Plane(0f, renderer.getHeight(), renderer.getWidth(), renderer.getWidth() / 3, coordinatesLocked)
+        lockedMessage.isVisible = false
+        lockedMessage.y = -getScreenWidth() * 0.5f
+        renderer.addDrawable(lockedMessage)
 
-        ScaleAnimation rightAnimation = new ScaleAnimation(right, Animation.DURATION_LONG, 0);
-        rightAnimation.setTo(1.2f);
+        val rightAnimation = ScaleAnimation(right, Animation.DURATION_LONG, 0)
+        rightAnimation.setTo(1.2f)
     }
 
-    @Override
-    public void entry() {
-        nextState = this;
-        lastLevelState = LastLevelState.NO_LEVEL;
-        reloadLevel();
+    override fun entry() {
+        nextState = this
+        lastLevelState = LastLevelState.NO_LEVEL
+        reloadLevel()
 
-        AnimationFactory.startMoveYTo(left, topButtonY);
-        AnimationFactory.startMoveYTo(right, topButtonY);
-        AnimationFactory.startMoveYTo(restart, topButtonY);
-        AnimationFactory.startMoveYTo(stepsLabel, topButtonY - 0.75f * (topButtonSize * 0.2f));
-        AnimationFactory.startMoveYTo(stepsBest, topButtonY + stepsUsedBestYDelta + 0.25f * topButtonSize);
-        AnimationFactory.startMoveYTo(stepsUsed, topButtonY + stepsUsedCurrentYDelta + 0.25f * topButtonSize);
-        AnimationFactory.startMoveYTo(stepsOptimal, topButtonY + stepsOptimalYDelta + 0.25f * topButtonSize);
-        AnimationFactory.startMoveYTo(headerBackground, getScreenHeight() - topBarHeight);
+        AnimationFactory.startMoveYTo(left, topButtonY)
+        AnimationFactory.startMoveYTo(right, topButtonY)
+        AnimationFactory.startMoveYTo(restart, topButtonY)
+        AnimationFactory.startMoveYTo(stepsLabel, topButtonY - 0.75f * (topButtonSize * 0.2f))
+        AnimationFactory.startMoveYTo(stepsBest, topButtonY + stepsUsedBestYDelta + 0.25f * topButtonSize)
+        AnimationFactory.startMoveYTo(stepsUsed, topButtonY + stepsUsedCurrentYDelta + 0.25f * topButtonSize)
+        AnimationFactory.startMoveYTo(stepsOptimal, topButtonY + stepsOptimalYDelta + 0.25f * topButtonSize)
+        AnimationFactory.startMoveYTo(headerBackground, getScreenHeight() - topBarHeight)
 
         // Animate new level label and number
-        AnimationFactory.startMoveYTo(levelNumber, topButtonY + currentLevelYDelta + 0.25f * topButtonSize);
+        AnimationFactory.startMoveYTo(levelNumber, topButtonY + currentLevelYDelta + 0.25f * topButtonSize)
     }
 
-    private void reloadLevel() {
-        won = false;
-        stepsUsed.setValue(0);
-        if (loadSteps(level.getNumber()) == STEPS_NOT_SOLVED) {
-            stepsBest.setValue(Number.VALUE_NAN);
+    private fun reloadLevel() {
+        won = false
+        stepsUsed.setValue(0)
+        if (loadSteps(level.number) == STEPS_NOT_SOLVED) {
+            stepsBest.setValue(Number.VALUE_NAN)
         } else {
-            stepsBest.setValue(loadSteps(level.getNumber()));
+            stepsBest.setValue(loadSteps(level.number))
         }
-        if (level.getOptimalSteps() <= 0) {
-            stepsOptimal.setValue(Number.VALUE_NAN);
+        if (level.optimalSteps <= 0) {
+            stepsOptimal.setValue(Number.VALUE_NAN)
         } else {
-            stepsOptimal.setValue(level.getOptimalSteps());
+            stepsOptimal.setValue(level.optimalSteps)
         }
-        AnimationFactory.startScaleHide(stepsImproved, 0);
-        isFilling = false;
-        level.reset();
-        levelDrawer.setLevel(level);
+        AnimationFactory.startScaleHide(stepsImproved, 0)
+        isFilling = false
+        level.reset()
+        levelDrawer.setLevel(level)
 
         // Set level number
-        levelNumber.setValue(level.getNumber());
+        levelNumber.setValue(level.number)
 
-        float remainingSpace = getScreenHeight() - topBarHeight - levelDrawer.getHeight();
-        final float horizontalPaddingDelta = levelDrawer.getBoxSize() / 2;
-        float horizontalPadding = horizontalPaddingDelta;
+        var remainingSpace = getScreenHeight() - topBarHeight - levelDrawer.height
+        val horizontalPaddingDelta = levelDrawer.boxSize / 2
+        var horizontalPadding = horizontalPaddingDelta
         while (remainingSpace < 0) {
-            levelDrawer.setScreenWidth(getScreenWidth() - 2 * horizontalPadding);
-            levelDrawer.setX(horizontalPadding);
-            remainingSpace = getScreenHeight() - topBarHeight - levelDrawer.getHeight();
-            horizontalPadding += horizontalPaddingDelta;
+            levelDrawer.setScreenWidth(getScreenWidth() - 2 * horizontalPadding)
+            levelDrawer.x = horizontalPadding
+            remainingSpace = getScreenHeight() - topBarHeight - levelDrawer.height
+            horizontalPadding += horizontalPaddingDelta
         }
-        boardStartY = topBarHeight + remainingSpace / 2;
+        boardStartY = topBarHeight + remainingSpace / 2
 
-        if (levelDrawer.getY() != getScreenHeight() - boardStartY) {
-            levelDrawer.cancelAnimations();
-            levelDrawer.setVisible(true);
-            TranslateAnimation drawerAnimation;
-            if (lastLevelState == LastLevelState.NO_LEVEL) {
-                levelDrawer.setY(-levelDrawer.getBoxSize());
-                drawerAnimation = new TranslateAnimation(levelDrawer, Animation.DURATION_LONG, Animation.DURATION_LONG);
+        if (levelDrawer.y != getScreenHeight() - boardStartY) {
+            levelDrawer.cancelAnimations()
+            levelDrawer.isVisible = true
+            val drawerAnimation: TranslateAnimation = if (lastLevelState == LastLevelState.NO_LEVEL) {
+                levelDrawer.y = -levelDrawer.boxSize
+                TranslateAnimation(levelDrawer, Animation.DURATION_LONG, Animation.DURATION_LONG)
             } else {
-                drawerAnimation = new TranslateAnimation(levelDrawer, Animation.DURATION_SHORT, 0);
+                TranslateAnimation(levelDrawer, Animation.DURATION_SHORT, 0)
             }
-            drawerAnimation.setTo(levelDrawer.getX(), getScreenHeight() - boardStartY);
-            drawerAnimation.start();
+            drawerAnimation.setTo(levelDrawer.x, getScreenHeight() - boardStartY)
+            drawerAnimation.start()
         }
 
         if (!isPlayable(level)) {
-            float availableSpace = getScreenHeight();
-            lockedMessage.cancelAnimations();
-            lockedMessage.setVisible(true);
-            TranslateAnimation inAnimation;
-            if (lastLevelState == LastLevelState.NO_LEVEL) {
-                inAnimation = new TranslateAnimation(lockedMessage, Animation.DURATION_LONG, Animation.DURATION_LONG);
+            val availableSpace = getScreenHeight()
+            lockedMessage.cancelAnimations()
+            lockedMessage.isVisible = true
+            val inAnimation: TranslateAnimation = if (lastLevelState == LastLevelState.NO_LEVEL) {
+                TranslateAnimation(lockedMessage, Animation.DURATION_LONG, Animation.DURATION_LONG)
             } else {
-                inAnimation = new TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0);
+                TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0)
             }
-            inAnimation.setTo(0, (availableSpace - lockedMessage.getHeight()) / 2);
-            inAnimation.start();
+            inAnimation.setTo(0f, (availableSpace - lockedMessage.height) / 2)
+            inAnimation.start()
         } else {
-            TranslateAnimation outAnimation = new TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0);
-            outAnimation.setTo(0, -getScreenWidth() * 0.5f);
-            outAnimation.setHideAfter(true);
-            outAnimation.start();
+            val outAnimation = TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0)
+            outAnimation.setTo(0f, -getScreenWidth() * 0.5f)
+            outAnimation.setHideAfter(true)
+            outAnimation.start()
         }
 
-        if (isSolved(level.getNumber())) {
+        if (isSolved(level.number)) {
             if (lastLevelState == LastLevelState.NO_LEVEL) {
-                solved.setScale(1);
-                AnimationFactory.startMoveYTo(solved, topButtonY);
+                solved.scale = 1f
+                AnimationFactory.startMoveYTo(solved, topButtonY)
             } else if (lastLevelState == LastLevelState.NOT_SOLVED) {
-                showSolved(Animation.DURATION_SHORT / 2);
+                showSolved(Animation.DURATION_SHORT / 2)
             }
-            lastLevelState = LastLevelState.SOLVED;
+            lastLevelState = LastLevelState.SOLVED
         } else {
-            if (!isSolved(level.getNumber()) && lastLevelState == LastLevelState.NO_LEVEL) {
-                solved.setVisible(false);
-            } else if (!isSolved(level.getNumber()) && lastLevelState == LastLevelState.SOLVED) {
-                hideSolved();
+            if (!isSolved(level.number) && lastLevelState == LastLevelState.NO_LEVEL) {
+                solved.isVisible = false
+            } else if (!isSolved(level.number) && lastLevelState == LastLevelState.SOLVED) {
+                hideSolved()
             }
-            lastLevelState = LastLevelState.NOT_SOLVED;
+            lastLevelState = LastLevelState.NOT_SOLVED
         }
 
-        if (winMessage.isVisible()) {
-            winMessage.cancelAnimations();
-            TranslateAnimation outAnimation = new TranslateAnimation(winMessage, Animation.DURATION_SHORT, 0);
-            outAnimation.setTo(0, -getScreenWidth() * 0.5f);
-            outAnimation.setHideAfter(true);
-            outAnimation.start();
+        if (winMessage.isVisible) {
+            winMessage.cancelAnimations()
+            val outAnimation = TranslateAnimation(winMessage, Animation.DURATION_SHORT, 0)
+            outAnimation.setTo(0f, -getScreenWidth() * 0.5f)
+            outAnimation.setHideAfter(true)
+            outAnimation.start()
         }
     }
 
-    @Override
-    public void exit() {
-        levelDrawer.cancelAnimations();
-        TranslateAnimation logoAnimation = new TranslateAnimation(levelDrawer, Animation.DURATION_LONG, Animation.DURATION_LONG);
-        logoAnimation.setTo(levelDrawer.getX(), -levelDrawer.getBoxSize());
-        logoAnimation.setHideAfter(true);
-        logoAnimation.start();
+    override fun exit() {
+        levelDrawer.cancelAnimations()
+        val logoAnimation = TranslateAnimation(levelDrawer, Animation.DURATION_LONG, Animation.DURATION_LONG)
+        logoAnimation.setTo(levelDrawer.x, -levelDrawer.boxSize)
+        logoAnimation.setHideAfter(true)
+        logoAnimation.start()
 
-        AnimationFactory.startMoveYTo(left, getScreenHeight() + topBarPadding);
-        AnimationFactory.startMoveYTo(right, getScreenHeight() + topBarPadding);
-        AnimationFactory.startMoveYTo(restart, getScreenHeight() + topBarPadding);
-        AnimationFactory.startMoveYTo(solved, getScreenHeight() + topBarPadding);
-        AnimationFactory.startMoveYTo(stepsLabel, getScreenHeight() + topBarPadding - 0.75f * (topButtonSize * 0.2f));
-        AnimationFactory.startMoveYTo(stepsBest, getScreenHeight() + topBarPadding
-                + stepsUsedBestYDelta + 0.25f * topButtonSize);
-        AnimationFactory.startMoveYTo(stepsUsed, getScreenHeight() + topBarPadding
-                + stepsUsedCurrentYDelta + 0.25f * topButtonSize);
-        AnimationFactory.startMoveYTo(stepsOptimal, getScreenHeight() + topBarPadding
-                + stepsOptimalYDelta + 0.25f * topButtonSize);
-        AnimationFactory.startMoveYTo(headerBackground, getScreenHeight());
-        AnimationFactory.startMoveYTo(winMessage, -getScreenWidth() * 0.5f);
-        AnimationFactory.startScaleHide(stepsImproved, 0);
+        AnimationFactory.startMoveYTo(left, getScreenHeight() + topBarPadding)
+        AnimationFactory.startMoveYTo(right, getScreenHeight() + topBarPadding)
+        AnimationFactory.startMoveYTo(restart, getScreenHeight() + topBarPadding)
+        AnimationFactory.startMoveYTo(solved, getScreenHeight() + topBarPadding)
+        AnimationFactory.startMoveYTo(stepsLabel, getScreenHeight() + topBarPadding - 0.75f * (topButtonSize * 0.2f))
+        AnimationFactory.startMoveYTo(
+            stepsBest, getScreenHeight() + topBarPadding
+                    + stepsUsedBestYDelta + 0.25f * topButtonSize
+        )
+        AnimationFactory.startMoveYTo(
+            stepsUsed, getScreenHeight() + topBarPadding
+                    + stepsUsedCurrentYDelta + 0.25f * topButtonSize
+        )
+        AnimationFactory.startMoveYTo(
+            stepsOptimal, getScreenHeight() + topBarPadding
+                    + stepsOptimalYDelta + 0.25f * topButtonSize
+        )
+        AnimationFactory.startMoveYTo(headerBackground, getScreenHeight())
+        AnimationFactory.startMoveYTo(winMessage, -getScreenWidth() * 0.5f)
+        AnimationFactory.startScaleHide(stepsImproved, 0)
 
         // Hide new level label and number
-        AnimationFactory.startMoveYTo(levelNumber, getScreenHeight() + topBarPadding
-                + currentLevelYDelta + 0.25f * topButtonSize);
+        AnimationFactory.startMoveYTo(
+            levelNumber, getScreenHeight() + topBarPadding
+                    + currentLevelYDelta + 0.25f * topButtonSize
+        )
 
-        TranslateAnimation outAnimation = new TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0);
-        outAnimation.setTo(0, -getScreenWidth() * 0.5f);
-        outAnimation.setHideAfter(true);
-        outAnimation.start();
+        val outAnimation = TranslateAnimation(lockedMessage, Animation.DURATION_SHORT, 0)
+        outAnimation.setTo(0f, -getScreenWidth() * 0.5f)
+        outAnimation.setHideAfter(true)
+        outAnimation.start()
     }
 
-    @Override
-    public State next() {
-        return nextState;
+    override fun next(): State {
+        return nextState
     }
 
-    @Override
-    public void onBackPressed() {
-        nextState = LevelSelectState.getInstance();
-        playSound(R.raw.click);
+    override fun onBackPressed() {
+        nextState = LevelSelectState.getInstance()
+        playSound(R.raw.click)
     }
 
-    @Override
-    public void onTouchEvent(MotionEvent event) {
-        if (event.getAction() != MotionEvent.ACTION_DOWN) {
-            return;
+    override fun onTouchEvent(event: MotionEvent) {
+        if (event.action != MotionEvent.ACTION_DOWN) {
+            return
         }
 
         if (left.collides(event, getScreenHeight())) {
-            playSound(R.raw.click);
-            if (level.getIndexInPack() == 0) {
-                nextState = LevelSelectState.getInstance();
+            playSound(R.raw.click)
+            if (level.indexInPack == 0) {
+                nextState = LevelSelectState.getInstance()
             } else {
-                level = level.getPack().getLevel(level.getIndexInPack() - 1);
-                reloadLevel();
+                level = level.pack.getLevel(level.indexInPack - 1)
+                reloadLevel()
             }
         } else if (right.collides(event, getScreenHeight())
-                || winMessage.collides(event, getScreenHeight())) {
-            playSound(R.raw.click);
-            if (level.getPack().size() == level.getIndexInPack() + 1) {
-                nextState = LevelSelectState.getInstance();
+            || winMessage.collides(event, getScreenHeight())
+        ) {
+            playSound(R.raw.click)
+            if (level.pack.size() == level.indexInPack + 1) {
+                nextState = LevelSelectState.getInstance()
             } else {
-                level = level.getPack().getLevel(level.getIndexInPack() + 1);
-                reloadLevel();
+                level = level.pack.getLevel(level.indexInPack + 1)
+                reloadLevel()
             }
         } else if (restart.collides(event, getScreenHeight())) {
-            playSound(R.raw.click);
+            playSound(R.raw.click)
             if (BuildConfig.DEBUG_LEVELS) {
-                makeUnPlayed(level.getNumber());
+                makeUnPlayed(level.number)
             }
             if (stepsUsed.getValue() != 0) {
-                wiggle();
+                wiggle()
             }
             if (isFilling) {
-                filler.setOnFinished(this::reloadLevel);
+                filler?.setOnFinished { reloadLevel() }
             } else {
-                reloadLevel();
+                reloadLevel()
             }
         } else if (!isFilling && !won && isPlayable(level)) {
-            checkFieldTouched(event);
+            checkFieldTouched(event)
         }
     }
 
-    private void wiggle() {
-        new ScaleAnimation(levelDrawer, Animation.DURATION_SHORT / 2, 0)
-                .setTo(0.95f).start();
-        new ScaleAnimation(levelDrawer, Animation.DURATION_SHORT / 2, Animation.DURATION_SHORT / 2)
-                .setTo(1f).start();
+    private fun wiggle() {
+        ScaleAnimation(levelDrawer, Animation.DURATION_SHORT / 2, 0)
+            .setTo(0.95f).start()
+        ScaleAnimation(levelDrawer, Animation.DURATION_SHORT / 2, Animation.DURATION_SHORT / 2)
+            .setTo(1f).start()
     }
 
-    private void checkFieldTouched(MotionEvent event) {
-        for (int row = 0; row < level.getHeight(); row++) {
-            for (int col = 0; col < level.getWidth(); col++) {
-                if (event.getY() > boardStartY + row * levelDrawer.getBoxSize()
-                        && event.getY() < boardStartY + (row + 1) * levelDrawer.getBoxSize()
-                        && event.getX() > levelDrawer.getX() + (col + 0.5) * levelDrawer.getBoxSize()
-                        && event.getX() < levelDrawer.getX() + (col + 1.5) * levelDrawer.getBoxSize()) {
+    private fun checkFieldTouched(event: MotionEvent) {
+        for (row in 0 until level.height) {
+            for (col in 0 until level.width) {
+                if (event.y > boardStartY + row * levelDrawer.boxSize
+                    && event.y < boardStartY + (row + 1) * levelDrawer.boxSize
+                    && event.x > levelDrawer.x + (col + 0.5) * levelDrawer.boxSize
+                    && event.x < levelDrawer.x + (col + 1.5) * levelDrawer.boxSize
+                ) {
 
-                    triggerField(col, row);
+                    triggerField(col, row)
                 }
             }
         }
     }
 
-    private void triggerField(final int col, final int row) {
-        filler = Filler.get(level, col, row, this);
+    private fun triggerField(col: Int, row: Int) {
+        filler = Filler.get(level, col, row, this)
         if (filler != null) {
-            stepsUsed.increment();
-            playSound(R.raw.click);
-            isFilling = true;
-            if (level.fieldAt(col, row).getModifier().isRotating()) {
-                Modifier rotated = level.fieldAt(col, row).getModifier().rotate();
-                level.fieldAt(col, row).setModifier(rotated);
+            stepsUsed.increment()
+            playSound(R.raw.click)
+            isFilling = true
+            if (level.fieldAt(col, row).modifier.isRotating()) {
+                val rotated = level.fieldAt(col, row).modifier.rotate()
+                level.fieldAt(col, row).modifier = rotated
             }
-            filler.setOnFinished(() -> {
-                isFilling = false;
-                checkWon();
-            });
-            filler.fill();
+            filler!!.setOnFinished {
+                isFilling = false
+                checkWon()
+            }
+            filler!!.fill()
         }
     }
 
-    public void setLevel(Level level) {
-        this.level = level;
+    fun setLevel(level: Level) {
+        this.level = level
     }
 
-    private void checkWon() {
-        won = true;
-        for (int r = 0; r < level.getHeight(); r++) {
-            for (int c = 0; c < level.getWidth(); c++) {
-                Field f = level.fieldAt(c, r);
-                if (Converter.convertColor(f.getModifier()) != null // Is not a color
-                        && f.getColor() != Converter.convertColor(f.getModifier())) {
-                    won = false;
+    private fun checkWon() {
+        won = true
+        for (r in 0 until level.height) {
+            for (c in 0 until level.width) {
+                val f = level.fieldAt(c, r)
+                if (Converter.convertColor(f.modifier) != null // Is not a color
+                    && f.color != Converter.convertColor(f.modifier)
+                ) {
+                    won = false
                 }
             }
         }
 
         if (won) {
-            playSound(R.raw.won);
-            makePlayed(level.getNumber());
-            saveSteps(level.getNumber(), stepsUsed.getValue());
-            lastLevelState = LastLevelState.SOLVED;
+            playSound(R.raw.won)
+            makePlayed(level.number)
+            saveSteps(level.number, stepsUsed.getValue())
+            lastLevelState = LastLevelState.SOLVED
 
-            float availableSpace = getScreenHeight();
-            winMessage.setY(-getScreenWidth() * 0.5f);
-            winMessage.setVisible(true);
-            TranslateAnimation inAnimation = new TranslateAnimation(winMessage, Animation.DURATION_SHORT, 0);
-            inAnimation.setTo(0, (availableSpace - winMessage.getHeight()) / 2);
-            inAnimation.start();
+            val availableSpace = getScreenHeight()
+            winMessage.y = -getScreenWidth() * 0.5f
+            winMessage.isVisible = true
+            val inAnimation = TranslateAnimation(winMessage, Animation.DURATION_SHORT, 0)
+            inAnimation.setTo(0f, (availableSpace - winMessage.height) / 2)
+            inAnimation.start()
 
-            if (!solved.isVisible()) {
-                showSolved(Animation.DURATION_LONG);
+            if (!solved.isVisible) {
+                showSolved(Animation.DURATION_LONG)
             }
 
             if (stepsUsed.getValue() < stepsBest.getValue() && stepsBest.getValue() < STEPS_NOT_SOLVED) {
-                AnimationFactory.startScaleShow(stepsImproved, 0);
+                AnimationFactory.startScaleShow(stepsImproved, 0)
             }
         }
     }
 
-    private void showSolved(int speed) {
-        solved.cancelAnimations();
-        solved.setScale(0);
-        solved.setY(topButtonY);
-        solved.setVisible(true);
-        ScaleAnimation leftAnimation = new ScaleAnimation(solved, speed, 0);
-        leftAnimation.setTo(1);
-        leftAnimation.start();
+    private fun showSolved(speed: Int) {
+        solved.cancelAnimations()
+        solved.scale = 0f
+        solved.y = topButtonY
+        solved.isVisible = true
+        val leftAnimation = ScaleAnimation(solved, speed, 0)
+        leftAnimation.setTo(1f)
+        leftAnimation.start()
     }
 
-    private void hideSolved() {
-        ScaleAnimation leftAnimation = new ScaleAnimation(solved, Animation.DURATION_SHORT / 2, 0);
-        leftAnimation.setTo(0);
-        leftAnimation.setHideAfter(true);
-        leftAnimation.start();
+    private fun hideSolved() {
+        val leftAnimation = ScaleAnimation(solved, Animation.DURATION_SHORT / 2, 0)
+        leftAnimation.setTo(0f)
+        leftAnimation.setHideAfter(true)
+        leftAnimation.start()
     }
 
-    private enum LastLevelState {
+    private enum class LastLevelState {
         SOLVED, NO_LEVEL, NOT_SOLVED
+    }
+
+    companion object {
+        @SuppressLint("StaticFieldLeak")
+        private var instance: GameState? = null
+
+        fun getInstance(): GameState {
+            if (instance == null) {
+                instance = GameState()
+            }
+            return instance!!
+        }
     }
 }

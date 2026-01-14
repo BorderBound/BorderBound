@@ -1,116 +1,46 @@
-package com.github.codeworkscreativehub.borderbound.model;
+package com.github.codeworkscreativehub.borderbound.model
 
-public class Field {
-    private Color color;
-    private Modifier modifier;
-    private boolean isVisited = false;
+class Field {
+    var color: Color
+    var modifier: Modifier
+    var isVisited: Boolean = false
 
-    public Field(char color, char modifier) {
-        switch (color) {
-            case 'r':
-                this.color = Color.RED;
-                break;
-            case 'g':
-                this.color = Color.GREEN;
-                break;
-            case 'b':
-                this.color = Color.BLUE;
-                break;
-            case 'o':
-                this.color = Color.ORANGE;
-                break;
-            case 'd':
-                this.color = Color.DARK;
-                break;
-            default:
-                this.color = Color.EMPTY;
-                break;
+    constructor(color: Char, modifier: Char) {
+        this.color = when (color) {
+            'r' -> Color.RED
+            'g' -> Color.GREEN
+            'b' -> Color.BLUE
+            'o' -> Color.ORANGE
+            'd' -> Color.DARK
+            else -> Color.EMPTY
         }
-        switch (modifier) {
-            case 'r':
-                this.modifier = Modifier.RED;
-                break;
-            case 'g':
-                this.modifier = Modifier.GREEN;
-                break;
-            case 'b':
-                this.modifier = Modifier.BLUE;
-                break;
-            case 'o':
-                this.modifier = Modifier.ORANGE;
-                break;
-            case 'd':
-                this.modifier = Modifier.DARK;
-                break;
-            case 'F':
-                this.modifier = Modifier.FLOOD;
-                break;
-            case 'U':
-                this.modifier = Modifier.UP;
-                break;
-            case 'R':
-                this.modifier = Modifier.RIGHT;
-                break;
-            case 'L':
-                this.modifier = Modifier.LEFT;
-                break;
-            case 'D':
-                this.modifier = Modifier.DOWN;
-                break;
-            case 'w':
-                this.modifier = Modifier.ROTATE_UP;
-                break;
-            case 'x':
-                this.modifier = Modifier.ROTATE_RIGHT;
-                break;
-            case 'a':
-                this.modifier = Modifier.ROTATE_LEFT;
-                break;
-            case 's':
-                this.modifier = Modifier.ROTATE_DOWN;
-                break;
-            case 'B':
-                this.modifier = Modifier.BOMB;
-                break;
-            case '0':
-                this.modifier = Modifier.EMPTY;
-                break;
-            default:
-                this.modifier = Modifier.TRANSPARENT;
-                break;
+        this.modifier = when (modifier) {
+            'r' -> Modifier.RED
+            'g' -> Modifier.GREEN
+            'b' -> Modifier.BLUE
+            'o' -> Modifier.ORANGE
+            'd' -> Modifier.DARK
+            'F' -> Modifier.FLOOD
+            'U' -> Modifier.UP
+            'R' -> Modifier.RIGHT
+            'L' -> Modifier.LEFT
+            'D' -> Modifier.DOWN
+            'w' -> Modifier.ROTATE_UP
+            'x' -> Modifier.ROTATE_RIGHT
+            'a' -> Modifier.ROTATE_LEFT
+            's' -> Modifier.ROTATE_DOWN
+            'B' -> Modifier.BOMB
+            '0' -> Modifier.EMPTY
+            else -> Modifier.TRANSPARENT
         }
     }
 
-    public Field(Color color, Modifier modifier) {
-        this.color = color;
-        this.modifier = modifier;
+    constructor(color: Color, modifier: Modifier) {
+        this.color = color
+        this.modifier = modifier
     }
 
-    public Modifier getModifier() {
-        return modifier;
-    }
-
-    public void setModifier(Modifier modifier) {
-        this.modifier = modifier;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
-    public boolean isVisited() {
-        return isVisited;
-    }
-
-    public void setVisited(boolean visited) {
-        isVisited = visited;
-    }
-
-    public Field clone() {
-        return new Field(color, modifier);
+    fun clone(): Field {
+        return Field(color, modifier)
     }
 }

@@ -1,107 +1,85 @@
-package com.github.codeworkscreativehub.borderbound.model;
+package com.github.codeworkscreativehub.borderbound.model
 
-import android.content.Context;
+import android.content.Context
+import com.github.codeworkscreativehub.borderbound.BuildConfig
+import org.w3c.dom.Element
+import org.w3c.dom.Node
+import javax.xml.parsers.DocumentBuilderFactory
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+class LevelPack private constructor(
+    val id: Int,
+    fileName: String,
+    context: Context
+) {
+    private val levels = ArrayList<Level>()
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-public class LevelPack {
-
-    public static LevelPack EASY;
-    public static LevelPack MEDIUM;
-    public static LevelPack HARD;
-    public static LevelPack COMMUNITY;
-    private final List<Level> levels = new ArrayList<>();
-    private final int id;
-
-    private LevelPack(int id, String fileName, Context context) {
-        this.id = id;
-
+    init {
         try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(context.getAssets().open(fileName + ".compressed"));
-            doc.getDocumentElement().normalize();
+            val dbf = DocumentBuilderFactory.newInstance()
+            val db = dbf.newDocumentBuilder()
+            val doc = db.parse(context.assets.open("$fileName.compressed"))
+            doc.documentElement.normalize()
 
-            NodeList levelList = doc.getDocumentElement().getChildNodes();
-            int indexInPack = 0;
+            val levelList = doc.documentElement.childNodes
+            var indexInPack = 0
 
-            for (int i = 0; i < levelList.getLength(); i++) {
-                Node node = levelList.item(i);
-                if (node.getNodeType() != Node.ELEMENT_NODE) continue;
+            for (i in 0 until levelList.length) {
+                val node = levelList.item(i)
+                if (node.nodeType != Node.ELEMENT_NODE) continue
 
-                Element levelEl = (Element) node;
-                int number = Integer.parseInt(levelEl.getAttribute("number"));
-                String colors = levelEl.getAttribute("color");
-                String modifiers = levelEl.getAttribute("modifier");
+                val levelEl = node as Element
+                val number = if (BuildConfig.DEBUG_LEVELS) {
+                    levelEl.getAttribute("number").toInt()
+                } else {
+                    indexInPack + 1
+                }
+                val colors = levelEl.getAttribute("color")
+                val modifiers = levelEl.getAttribute("modifier")
 
-                int optimalSteps = 0;
+                var optimalSteps = 0
                 if (levelEl.hasAttribute("solution")) {
-                    optimalSteps = levelEl.getAttribute("solution").split(",").length;
+                    optimalSteps = levelEl.getAttribute("solution").split(",").size
                 }
 
-                levels.add(new Level(indexInPack, number, this, colors, modifiers, optimalSteps));
-                indexInPack++;
+                levels.add(Level(indexInPack, number, this, colors, modifiers, optimalSteps))
+                indexInPack++
             }
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error loading level pack " + fileName, e);
+        } catch (e: Exception) {
+            throw RuntimeException("Error loading level pack $fileName", e)
         }
     }
 
-    /**
-     * Initialize all LevelPack singletons
-     */
-    public static void parsePacks(Context context) {
-        EASY = new LevelPack(1, "levelsEasy.xml", context);
-        MEDIUM = new LevelPack(2, "levelsMedium.xml", context);
-        HARD = new LevelPack(3, "levelsHard.xml", context);
-        COMMUNITY = new LevelPack(4, "levelsCommunity.xml", context);
+    fun getLevel(indexInPack: Int): Level {
+        return levels[indexInPack]
     }
 
-    public Level getLevel(int indexInPack) {
-        return levels.get(indexInPack);
+    fun size(): Int {
+        return levels.size
     }
 
-    public int size() {
-        return levels.size();
-    }
+    val firstLevel: Level?
+        get() = if (levels.isEmpty()) null else levels[0]
 
-    public int id() {
-        return id;
-    }
+    fun isEasy(): Boolean = this === EASY
+    fun isMedium(): Boolean = this === MEDIUM
+    fun isHard(): Boolean = this === HARD
+    fun isCommunity(): Boolean = this === COMMUNITY
 
-    /**
-     * Returns the first level in this pack
-     */
-    public Level getFirstLevel() {
-        return levels.isEmpty() ? null : levels.get(0);
-    }
+    companion object {
+        lateinit var EASY: LevelPack
+        lateinit var MEDIUM: LevelPack
+        lateinit var HARD: LevelPack
+        lateinit var COMMUNITY: LevelPack
 
-    /**
-     * Check if this LevelPack instance equals one of the predefined packs
-     */
-    public boolean isEasy() {
-        return this == EASY;
-    }
-
-    public boolean isMedium() {
-        return this == MEDIUM;
-    }
-
-    public boolean isHard() {
-        return this == HARD;
-    }
-
-    public boolean isCommunity() {
-        return this == COMMUNITY;
+        /**
+         * Initialize all LevelPack singletons
+         */
+        fun parsePacks(context: Context) {
+            EASY = LevelPack(1, "levelsEasy.xml", context)
+            MEDIUM = LevelPack(2, "levelsMedium.xml", context)
+            HARD = LevelPack(3, "levelsHard.xml", context)
+            COMMUNITY = LevelPack(4, "levelsCommunity.xml", context)
+        }
     }
 }

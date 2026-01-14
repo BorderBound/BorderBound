@@ -1,55 +1,55 @@
-package com.github.codeworkscreativehub.borderbound.object;
+package com.github.codeworkscreativehub.borderbound.`object`
 
-import android.view.MotionEvent;
+import android.view.MotionEvent
 
-public class Plane extends Mesh {
-    private final float width;
-    private final float height;
+class Plane(
+    x: Float,
+    y: Float,
+    val width: Float,
+    val height: Float,
+    coordinates: TextureCoordinates
+) : Mesh() {
 
-    public Plane(float x, float y, float width, float height, TextureCoordinates coordinates) {
-        this.width = width;
-        this.height = height;
-        setX(x);
-        setY(y);
+    init {
+        this.x = x
+        this.y = y
 
-        setIndices(new short[] {
+        setIndices(
+            shortArrayOf(
                 0, 2, 1, 2, 3, 1
-        });
-        setVertices(new float[] {
+            )
+        )
+        setVertices(
+            floatArrayOf(
                 /* X,  Y,      Z */
-                0.0f,  0,      0.0f, // 0 - l.u.
-                0.0f,  height, 0.0f, // 1 - l.o.
-                width, 0,      0.0f, // 2 - r.u.
-                width, height, 0.0f, // 3 - r.o.
-        });
-        updateTextureCoordinates(coordinates);
+                0.0f, 0f, 0.0f, // 0 - l.u.
+                0.0f, height, 0.0f, // 1 - l.o.
+                width, 0f, 0.0f, // 2 - r.u.
+                width, height, 0.0f // 3 - r.o.
+            )
+        )
+        updateTextureCoordinates(coordinates)
     }
 
-    public void updateTextureCoordinates(TextureCoordinates coordinates) {
-        setTextureCoordinates(new float[] {
-                coordinates.getFromX(), coordinates.getToY(),    // 0 - l.u.
-                coordinates.getFromX(), coordinates.getFromY(),  // 1 - l.o.
-                coordinates.getToX(),   coordinates.getToY(),    // 2 - r.u.
-                coordinates.getToX(),   coordinates.getFromY(),  // 3 - r.o.
-        });
+    fun updateTextureCoordinates(coordinates: TextureCoordinates) {
+        setTextureCoordinates(
+            floatArrayOf(
+                coordinates.fromX, coordinates.toY,    // 0 - l.u.
+                coordinates.fromX, coordinates.fromY,  // 1 - l.o.
+                coordinates.toX, coordinates.toY,    // 2 - r.u.
+                coordinates.toX, coordinates.fromY   // 3 - r.o.
+            )
+        )
     }
 
-    public float getWidth() {
-        return width;
+    fun collides(event: MotionEvent, screenHeight: Float): Boolean {
+        return collides(event.x, event.y, screenHeight)
     }
 
-    public float getHeight() {
-        return height;
-    }
-
-    public boolean collides(MotionEvent event, float screenHeight) {
-        return collides(event.getX(), event.getY(), screenHeight);
-    }
-
-    public boolean collides(float x, float y, float screenHeight) {
-        return y < screenHeight - getY()
-                && y  > screenHeight - (getY() + getHeight())
-                && x  > getX()
-                && x  < getX() + getWidth();
+    fun collides(x: Float, y: Float, screenHeight: Float): Boolean {
+        return y < screenHeight - this.y &&
+                y > screenHeight - (this.y + height) &&
+                x > this.x &&
+                x < this.x + width
     }
 }

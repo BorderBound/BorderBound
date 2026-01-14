@@ -1,30 +1,28 @@
-package com.github.codeworkscreativehub.borderbound.object;
+package com.github.codeworkscreativehub.borderbound.`object`
 
-import javax.microedition.khronos.opengles.GL10;
-import java.util.ArrayList;
+import javax.microedition.khronos.opengles.GL10
 
-public class Container extends Drawable {
-    private ArrayList<Drawable> children = new ArrayList<>();
+class Container : Drawable() {
+    private val children = ArrayList<Drawable>()
 
-    public void addDrawable(Drawable d) {
-        children.add(d);
+    fun addDrawable(d: Drawable) {
+        children.add(d)
     }
 
-    @Override
-    public void draw(GL10 gl) {
-        if (!isVisible()) {
-            return;
+    override fun draw(gl: GL10) {
+        if (!isVisible) {
+            return
         }
-        processAnimations();
+        processAnimations()
 
-        gl.glPushMatrix();
-        gl.glTranslatef(getX(), getY(), 0);
-        gl.glScalef(getScale(), getScale(), getScale());
+        gl.glPushMatrix()
+        gl.glTranslatef(x, y, 0f)
+        gl.glScalef(scale, scale, scale)
 
-        for (Drawable child : children) {
-            child.draw(gl);
+        for (child in children) {
+            child.draw(gl)
         }
 
-        gl.glPopMatrix();
+        gl.glPopMatrix()
     }
 }

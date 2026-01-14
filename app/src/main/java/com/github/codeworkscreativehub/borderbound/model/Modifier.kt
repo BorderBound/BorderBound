@@ -1,28 +1,23 @@
-package com.github.codeworkscreativehub.borderbound.model;
+package com.github.codeworkscreativehub.borderbound.model
 
-public enum Modifier {
+enum class Modifier {
     DARK, GREEN, BLUE, ORANGE, RED, EMPTY, TRANSPARENT,
     FLOOD, BOMB,
     UP, RIGHT, LEFT, DOWN,
     ROTATE_UP, ROTATE_RIGHT, ROTATE_LEFT, ROTATE_DOWN;
 
-    public boolean isRotating() {
+    fun isRotating(): Boolean {
         return this == ROTATE_DOWN || this == ROTATE_UP
-                || this == ROTATE_LEFT || this == ROTATE_RIGHT;
+                || this == ROTATE_LEFT || this == ROTATE_RIGHT
     }
 
-    public Modifier rotate() {
-        switch (this) {
-            case ROTATE_UP:
-                return ROTATE_RIGHT;
-            case ROTATE_RIGHT:
-                return ROTATE_DOWN;
-            case ROTATE_LEFT:
-                return ROTATE_UP;
-            case ROTATE_DOWN:
-                return ROTATE_LEFT;
-            default:
-                return TRANSPARENT;
+    fun rotate(): Modifier {
+        return when (this) {
+            ROTATE_UP -> ROTATE_RIGHT
+            ROTATE_RIGHT -> ROTATE_DOWN
+            ROTATE_LEFT -> ROTATE_UP
+            ROTATE_DOWN -> ROTATE_LEFT
+            else -> TRANSPARENT
         }
     }
 }

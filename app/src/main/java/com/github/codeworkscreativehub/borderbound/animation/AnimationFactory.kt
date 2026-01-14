@@ -1,62 +1,62 @@
-package com.github.codeworkscreativehub.borderbound.animation;
+package com.github.codeworkscreativehub.borderbound.animation
 
-import com.github.codeworkscreativehub.borderbound.object.Drawable;
-import com.github.codeworkscreativehub.borderbound.object.Plane;
+import com.github.codeworkscreativehub.borderbound.`object`.Drawable
+import com.github.codeworkscreativehub.borderbound.`object`.Plane
 
-public class AnimationFactory {
-    public static void startMenuAnimationOutPressed(Plane plane) {
-        plane.cancelAnimations();
-        TranslateAnimation menuAnimation = new TranslateAnimation(plane, Animation.DURATION_LONG, Animation.DURATION_SHORT);
-        menuAnimation.setTo(-plane.getWidth(), plane.getY());
-        menuAnimation.setHideAfter(true);
-        menuAnimation.start();
+object AnimationFactory {
+    fun startMenuAnimationOutPressed(plane: Plane) {
+        plane.cancelAnimations()
+        val menuAnimation = TranslateAnimation(plane, Animation.DURATION_LONG, Animation.DURATION_SHORT)
+        menuAnimation.setTo(-plane.width, plane.y)
+        menuAnimation.setHideAfter(true)
+        menuAnimation.start()
     }
 
-    public static void startMenuAnimationOut(Plane plane) {
-        plane.cancelAnimations();
-        TranslateAnimation menuAnimation = new TranslateAnimation(plane, Animation.DURATION_SHORT, 0);
-        menuAnimation.setTo(-plane.getWidth(), plane.getY());
-        menuAnimation.setHideAfter(true);
-        menuAnimation.start();
+    fun startMenuAnimationOut(plane: Plane) {
+        plane.cancelAnimations()
+        val menuAnimation = TranslateAnimation(plane, Animation.DURATION_SHORT, 0)
+        menuAnimation.setTo(-plane.width, plane.y)
+        menuAnimation.setHideAfter(true)
+        menuAnimation.start()
     }
 
-    public static void startMenuAnimationEnter(Plane plane, int delay) {
-        plane.cancelAnimations();
-        plane.setVisible(true);
-        TranslateAnimation menuAnimation = new TranslateAnimation(plane, Animation.DURATION_LONG, delay);
-        menuAnimation.setTo(0, plane.getY());
-        menuAnimation.start();
+    fun startMenuAnimationEnter(plane: Plane, delay: Int) {
+        plane.cancelAnimations()
+        plane.isVisible = true
+        val menuAnimation = TranslateAnimation(plane, Animation.DURATION_LONG, delay)
+        menuAnimation.setTo(0f, plane.y)
+        menuAnimation.start()
     }
 
-    public static void startScaleShow(Plane plane) {
-        startScaleShow(plane, Animation.DURATION_LONG);
+    fun startScaleShow(plane: Plane) {
+        startScaleShow(plane, Animation.DURATION_LONG)
     }
 
-    public static void startScaleShow(Plane plane, int delay) {
-        plane.cancelAnimations();
-        plane.setVisible(true);
-        ScaleAnimation leftAnimation = new ScaleAnimation(plane, Animation.DURATION_LONG, delay);
-        leftAnimation.setTo(1);
-        leftAnimation.start();
+    fun startScaleShow(plane: Plane, delay: Int) {
+        plane.cancelAnimations()
+        plane.isVisible = true
+        val leftAnimation = ScaleAnimation(plane, Animation.DURATION_LONG, delay)
+        leftAnimation.setTo(1f)
+        leftAnimation.start()
     }
 
-    public static void startScaleHide(Plane plane) {
-        startScaleHide(plane, Animation.DURATION_LONG);
+    fun startScaleHide(plane: Plane) {
+        startScaleHide(plane, Animation.DURATION_LONG)
     }
 
-    public static void startScaleHide(Plane plane, int delay) {
-        plane.cancelAnimations();
-        ScaleAnimation leftAnimation = new ScaleAnimation(plane, Animation.DURATION_LONG, delay);
-        leftAnimation.setTo(0);
-        leftAnimation.setHideAfter(true);
-        leftAnimation.start();
+    fun startScaleHide(plane: Plane, delay: Int) {
+        plane.cancelAnimations()
+        val leftAnimation = ScaleAnimation(plane, Animation.DURATION_LONG, delay)
+        leftAnimation.setTo(0f)
+        leftAnimation.setHideAfter(true)
+        leftAnimation.start()
     }
 
-    public static void startMoveYTo(Drawable plane, float toY) {
-        plane.cancelAnimations();
-        plane.setVisible(true);
-        TranslateAnimation leftAnimation = new TranslateAnimation(plane, Animation.DURATION_LONG, Animation.DURATION_LONG);
-        leftAnimation.setTo(plane.getX(), toY);
-        leftAnimation.start();
+    fun startMoveYTo(plane: Drawable, toY: Float) {
+        plane.cancelAnimations()
+        plane.isVisible = true
+        val leftAnimation = TranslateAnimation(plane, Animation.DURATION_LONG, Animation.DURATION_LONG)
+        leftAnimation.setTo(plane.x, toY)
+        leftAnimation.start()
     }
 }
