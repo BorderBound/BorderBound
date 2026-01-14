@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.view.MotionEvent
+import androidx.core.content.edit
 import com.github.codeworkscreativehub.borderbound.BuildConfig
 import com.github.codeworkscreativehub.borderbound.GLRenderer
 import com.github.codeworkscreativehub.borderbound.SoundPool
@@ -44,16 +45,16 @@ abstract class State {
     }
 
     internal fun makePlayed(level: Int) {
-        playedPrefs.edit().putBoolean("l$level", true).apply()
+        playedPrefs.edit { putBoolean("l$level", true) }
     }
 
     internal fun makeUnPlayed(level: Int) {
-        playedPrefs.edit().putBoolean("l$level", false).apply()
+        playedPrefs.edit { putBoolean("l$level", false) }
     }
 
     internal fun saveSteps(level: Int, steps: Int) {
         if (playedPrefs.getInt("s$level", STEPS_NOT_SOLVED) > steps) {
-            playedPrefs.edit().putInt("s$level", steps).apply()
+            playedPrefs.edit { putInt("s$level", steps) }
         }
     }
 

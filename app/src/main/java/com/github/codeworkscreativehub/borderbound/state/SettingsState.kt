@@ -2,8 +2,9 @@ package com.github.codeworkscreativehub.borderbound.state
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import android.view.MotionEvent
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import com.github.codeworkscreativehub.borderbound.GLRenderer
 import com.github.codeworkscreativehub.borderbound.R
 import com.github.codeworkscreativehub.borderbound.animation.Animation
@@ -143,13 +144,13 @@ class SettingsState private constructor() : State() {
             if (volumeOn.collides(event, getScreenHeight()) || volumeButton.collides(event, getScreenHeight())) {
                 playSound(R.raw.click)
                 val newVolume = !preferences.getBoolean("volumeOn", true)
-                preferences.edit().putBoolean("volumeOn", newVolume).apply()
+                preferences.edit { putBoolean("volumeOn", newVolume) }
                 volumeOff.isVisible = !newVolume
                 volumeOn.isVisible = newVolume
             } else if (colorsExample.collides(event, getScreenHeight()) || colorsButton.collides(event, getScreenHeight())) {
                 playSound(R.raw.click)
                 val newColorschemeIndex = (preferences.getInt("colorschemeIndex", 0) + 1) % numberOfColorschemes
-                preferences.edit().putInt("colorschemeIndex", newColorschemeIndex).apply()
+                preferences.edit { putInt("colorschemeIndex", newColorschemeIndex) }
                 glRenderer.setColorscheme(newColorschemeIndex)
             } else if (tutorialButton.collides(event, getScreenHeight())) {
                 nextState = TutorialState.getInstance()
@@ -157,7 +158,7 @@ class SettingsState private constructor() : State() {
             } else if (editorButton.collides(event, getScreenHeight())) {
                 nextState = MainMenuState.getInstance()
                 playSound(R.raw.click)
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://flowit.bytehamster.com/"))
+                val browserIntent = Intent(Intent.ACTION_VIEW, "https://flowit.bytehamster.com/".toUri())
                 getActivity()?.startActivity(browserIntent)
             }
         }

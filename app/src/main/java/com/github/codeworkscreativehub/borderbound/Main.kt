@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.Window
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -40,9 +41,8 @@ class Main : AppCompatActivity() {
         glSurfaceView = findViewById(R.id.gl_surface_view)
 
         // Update last app version in preferences
-        getSharedPreferences("preferences", MODE_PRIVATE).edit().apply {
+        getSharedPreferences("preferences", MODE_PRIVATE).edit {
             putInt("lastAppVersion", BuildConfig.VERSION_CODE)
-            apply()
         }
 
         LevelPack.parsePacks(this)

@@ -2,6 +2,7 @@ package com.github.codeworkscreativehub.borderbound.state
 
 import android.annotation.SuppressLint
 import android.view.MotionEvent
+import androidx.core.content.edit
 import com.github.codeworkscreativehub.borderbound.GLRenderer
 import com.github.codeworkscreativehub.borderbound.R
 import com.github.codeworkscreativehub.borderbound.animation.Animation
@@ -28,7 +29,7 @@ class LevelSelectState private constructor() : State() {
 
         val boxSize = getScreenWidth() / (5 + 2 + 2)
         levelList = LevelList(boxSize, this)
-        scrollHelper = ScrollHelper(levelList, false, true)
+        scrollHelper = ScrollHelper(levelList, horizontal = false, vertical = true)
 
         renderer.addDrawable(levelList)
         renderer.addDrawable(selectLevelText)
@@ -88,7 +89,7 @@ class LevelSelectState private constructor() : State() {
             }
         } else if (event.action == MotionEvent.ACTION_UP) {
             pressed = false
-            preferences.edit().putFloat("scroll_state_" + pack!!.id, levelList.y).apply()
+            preferences.edit { putFloat("scroll_state_" + pack!!.id, levelList.y) }
         }
         scrollHelper.onTouchEvent(event)
     }
