@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :wrench: Code Quality:
 
+* Refactor app name and update URL ([2fcb276](https://github.com/BorderBound/BorderBound/commit/2fcb276))
 * Use Kotlin extensions for SharedPreferences and Uri ([70d52a2](https://github.com/BorderBound/BorderBound/commit/70d52a2))
 * Migrate codebase from Java to Kotlin ([79200a4](https://github.com/BorderBound/BorderBound/commit/79200a4))
 * Enhance script with new features and validation ([05c2a53](https://github.com/BorderBound/BorderBound/commit/05c2a53))
