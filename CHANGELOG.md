@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :broom: Maintenance & Cleanup:
 
+* Update Kotlin version in libs.versions.toml ([26c9243](https://github.com/BorderBound/BorderBound/commit/26c9243))
 * Update library versions in libs.versions.toml ([5374a8d](https://github.com/BorderBound/BorderBound/commit/5374a8d))
 * Update Gradle and library versions, enhance build configuration ([9eb1969](https://github.com/BorderBound/BorderBound/commit/9eb1969))
 
