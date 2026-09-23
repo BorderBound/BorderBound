@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :broom: Maintenance & Cleanup:
 
+* Bump patch version to 1 and reset build number to 0 ([f152618](https://github.com/BorderBound/BorderBound/commit/f152618))
 * Update level numbers in XML files and enhance sorting logic ([5c6602f](https://github.com/BorderBound/BorderBound/commit/5c6602f))
 * Update level numbers and solutions in levelsCommunity.xml ([579a310](https://github.com/BorderBound/BorderBound/commit/579a310))
 * Update level numbers and solutions in XML files ([0c9dce6](https://github.com/BorderBound/BorderBound/commit/0c9dce6))
