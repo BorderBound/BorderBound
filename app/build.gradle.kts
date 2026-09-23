@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.ApplicationExtension
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -24,17 +26,18 @@ val versionCodeBase =
 //   Android configuration
 // =========================
 
-android {
+extensions.configure<ApplicationExtension>("android") {
+
     namespace = "com.github.codeworkscreativehub.borderbound"
-    compileSdk {
-        version = release(36)
-    }
+
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 37
         versionCode = versionCodeBase
         versionName = baseVersionName
+
         buildConfigField("boolean", "DEBUG_LEVELS", "false")
     }
 
@@ -73,7 +76,6 @@ android {
         getByName("debug") {
             isDebuggable = true
             isMinifyEnabled = false
-            isShrinkResources = false
             applicationIdSuffix = ".debug"
 
             resValue("string", "app_version", baseVersionName)
@@ -96,22 +98,11 @@ android {
         }
     }
 
-    applicationVariants.all {
-        val flavorName = this.flavorName
-
-        outputs.all {
-            val output =
-                this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-
-            output.outputFileName =
-                "app_${flavorName}_release.apk"
-        }
-    }
-
     buildFeatures {
         compose = true
         viewBinding = true
         buildConfig = true
+        resValues = true
     }
 
     compileOptions {
@@ -124,41 +115,15 @@ android {
     }
 
     packaging {
-        // Keep debug symbols for specific native libraries
-        // found in /app/build/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib
         jniLibs {
-            keepDebugSymbols.add("libandroidx.graphics.path.so") // Ensure debug symbols are kept
+            keepDebugSymbols.add("libandroidx.graphics.path.so")
         }
     }
 
-    tasks.register("compressLevelFile") {
-        doLast {
-            compress("$projectDir/src/main/assets/levelsEasy.xml")
-            compress("$projectDir/src/main/assets/levelsMedium.xml")
-            compress("$projectDir/src/main/assets/levelsHard.xml")
-            compress("$projectDir/src/main/assets/levelsCommunity.xml")
-        }
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
-
-    // Make preBuild depend on this task
-    tasks.named("preBuild") {
-        dependsOn("compressLevelFile")
-    }
-
-    tasks.register("deleteCompressedLevelFiles") {
-        doLast {
-            project.delete(
-                project.fileTree("$projectDir/src/main/assets") {
-                    include("**/*.compressed")
-                }
-            )
-        }
-    }
-
-    tasks.matching { it.name.startsWith("assemble") }.configureEach {
-        finalizedBy("deleteCompressedLevelFiles")
-    }
-
 }
 
 // =========================
@@ -169,7 +134,127 @@ kotlin {
     jvmToolchain(17)
 
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        jvmTarget.set(
+            org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+        )
+    }
+}
+
+// =========================
+//   Compress level files
+// =========================
+
+tasks.register("compressLevelFile") {
+    description = "Compress level files for release builds"
+    doLast {
+        compress(
+            rootProject
+                .file("app/src/main/assets/levelsEasy.xml")
+                .absolutePath
+        )
+
+        compress(
+            rootProject
+                .file("app/src/main/assets/levelsMedium.xml")
+                .absolutePath
+        )
+
+        compress(
+            rootProject
+                .file("app/src/main/assets/levelsHard.xml")
+                .absolutePath
+        )
+
+        compress(
+            rootProject
+                .file("app/src/main/assets/levelsCommunity.xml")
+                .absolutePath
+        )
+    }
+}
+
+// Make preBuild depend on compression
+tasks.named("preBuild") {
+    dependsOn("compressLevelFile")
+}
+
+// =========================
+//   Delete compressed files
+// =========================
+
+tasks.register("deleteCompressedLevelFiles") {
+    description = "Delete compressed level files"
+    doLast {
+        project.delete(
+            rootProject.fileTree(
+                "app/src/main/assets"
+            ) {
+                include("**/*.compressed")
+            }
+        )
+    }
+}
+
+// Clean up compressed files after assemble tasks
+tasks.matching {
+    it.name.startsWith("assemble")
+}.configureEach {
+    finalizedBy("deleteCompressedLevelFiles")
+}
+
+// =========================
+//   APK naming
+// =========================
+
+tasks.matching {
+    it.name.startsWith("assemble") &&
+            it.name.endsWith("Release")
+}.configureEach {
+
+    doLast {
+        val flavor = when {
+            name.contains("Prod", ignoreCase = true) -> "prod"
+            name.contains("Beta", ignoreCase = true) -> "beta"
+            name.contains("Alpha", ignoreCase = true) -> "alpha"
+            name.contains("Nightly", ignoreCase = true) -> "nightly"
+            else -> return@doLast
+        }
+
+        val apkDir = layout.buildDirectory
+            .dir("outputs/apk/release")
+            .get()
+            .asFile
+
+        if (apkDir.exists()) {
+            apkDir.walkTopDown()
+                .filter {
+                    it.isFile &&
+                            it.extension.equals("apk", ignoreCase = true)
+                }
+                .forEach { apk ->
+
+                    val target = File(
+                        apk.parentFile,
+                        "app_${flavor}_release.apk"
+                    )
+
+                    if (apk.absolutePath != target.absolutePath) {
+                        if (target.exists()) {
+                            target.delete()
+                        }
+
+                        if (apk.renameTo(target)) {
+                            println(
+                                "Renamed APK: ${target.name}"
+                            )
+                        } else {
+                            println(
+                                "Warning: Failed to rename ${apk.name}"
+                            )
+                        }
+                    }
+                }
+        }
     }
 }
 
@@ -178,11 +263,21 @@ kotlin {
 // =========================
 
 fun compress(path: String) {
-    val file = file(path)
-    var levels = file.readText()
-    println("  Original: ${levels.length} bytes")
+    val file = rootProject.file(path)
 
-    // Apply the same regex replacements
+    if (!file.exists()) {
+        error("Level file not found: ${file.absolutePath}")
+    }
+
+    var levels = file.readText()
+
+    println(
+        "Compressing ${file.name}"
+    )
+    println(
+        "  Original: ${levels.length} bytes"
+    )
+
     levels = levels
         .replace(Regex("\\s+"), " ")
         .replace(Regex("\"\\n ?"), "\" ")
@@ -191,9 +286,13 @@ fun compress(path: String) {
         .replace(Regex("<!--([^>]*)-->"), "")
         .plus("\n")
 
-    println(", compressed: ${levels.length} bytes")
+    println(
+        "  Compressed: ${levels.length} bytes"
+    )
 
-    file("$path.compressed").writeText(levels)
+    rootProject
+        .file("${path}.compressed")
+        .writeText(levels)
 }
 
 // =========================
@@ -201,23 +300,38 @@ fun compress(path: String) {
 // =========================
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation(
+        fileTree(
+            mapOf(
+                "dir" to rootProject
+                    .file("app/libs")
+                    .absolutePath,
+                "include" to listOf("*.jar")
+            )
+        )
+    )
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+
     implementation(libs.androidx.graphics.core)
     implementation(libs.androidx.appcompat)
+
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(
+        libs.androidx.compose.ui.test.junit4
+    )
+
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
