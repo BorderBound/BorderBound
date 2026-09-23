@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### :broom: Maintenance & Cleanup:
 
+* Update library versions in libs.versions.toml ([5374a8d](https://github.com/BorderBound/BorderBound/commit/5374a8d))
 * Update Gradle and library versions, enhance build configuration ([9eb1969](https://github.com/BorderBound/BorderBound/commit/9eb1969))
 
 ## [10001 (0.1.0 build 1) - BorderBound](https://github.com/BorderBound/BorderBound/tree/0.1.0.1) - (08, January 2026)
